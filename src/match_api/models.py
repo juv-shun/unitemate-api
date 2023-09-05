@@ -89,3 +89,8 @@ class MatchResult(BaseModel):
     role: Optional[RoleEnum] = None
 
 
+class MatchBanned(BaseModel):
+    namespace: str = "default#banned"
+    match_id: str
+    datetime: datetime
+    pokemon: PokemonEnum

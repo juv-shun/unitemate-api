@@ -49,6 +49,14 @@ functions:
           path: match/result
           method: post
           private: true
+  match_banned_api:
+    name: ${sls:stage}-${self:service}-post-match-banned
+    handler: src.match_api.handler.banned
+    events:
+      - http:
+          path: match/banned
+          method: post
+          private: true
 
 plugins:
   - serverless-prune-plugin
