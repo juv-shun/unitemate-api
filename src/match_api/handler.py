@@ -5,7 +5,7 @@ import arrow
 import boto3
 from pydantic import ValidationError
 
-from .models import MatchBanned, MatchUserResult
+from .models import MatchBasicResult, MatchUserResult
 
 dynamodb = boto3.resource("dynamodb")
 DYNAMODB_TABLE = os.environ["DYNAMODB_TABLE"]
@@ -36,9 +36,9 @@ def user_result(event, _):
     return {"statusCode": 201, "body": None}
 
 
-def banned(event, _):
+def basic_result(event, _):
     try:
-        model = MatchBanned(**json.loads(event["body"]))
+        model = MatchBasicResult(**json.loads(event["body"]))
     except ValidationError as e:
         return {"statusCode": 422, "body": json.dumps(e.errors())}
 
@@ -49,8 +49,7 @@ def banned(event, _):
             "match_id": model.match_id,
             "namespace_user_id": f"{model.namespace}#N/A",
             "timestamp": int(model.datetime.timestamp()),
-            "pokemon": model.pokemon,
-            "namespace_pokemon": f"{model.namespace}#{model.pokemon}",
+            "teams": [dict(team_data) for team_data in model.teams] if model.teams else None,
             "ttl": arrow.get(model.datetime).shift(days=180).int_timestamp,
         }
     )

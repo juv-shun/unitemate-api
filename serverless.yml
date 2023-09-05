@@ -49,12 +49,12 @@ functions:
           path: v1/match/user_result
           method: post
           private: true
-  match_banned_api:
-    name: ${sls:stage}-${self:service}-post-match-banned
-    handler: src.match_api.handler.banned
+  match_basic_result:
+    name: ${sls:stage}-${self:service}-basic-result
+    handler: src.match_api.handler.basic_result
     events:
       - http:
-          path: match/banned
+          path: v1/match/basic_result
           method: post
           private: true
 
