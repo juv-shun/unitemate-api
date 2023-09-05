@@ -41,12 +41,12 @@ package:
     - poetry.lock
 
 functions:
-  match_result_api:
-    name: ${sls:stage}-${self:service}-post-match-result
-    handler: src.match_api.handler.result
+  match_user_result:
+    name: ${sls:stage}-${self:service}-user-result
+    handler: src.match_api.handler.user_result
     events:
       - http:
-          path: match/result
+          path: v1/match/user_result
           method: post
           private: true
   match_banned_api:

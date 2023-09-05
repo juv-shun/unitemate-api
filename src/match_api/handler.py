@@ -5,15 +5,15 @@ import arrow
 import boto3
 from pydantic import ValidationError
 
-from .models import MatchBanned, MatchResult
+from .models import MatchBanned, MatchUserResult
 
 dynamodb = boto3.resource("dynamodb")
 DYNAMODB_TABLE = os.environ["DYNAMODB_TABLE"]
 
 
-def result(event, _):
+def user_result(event, _):
     try:
-        model = MatchResult(**json.loads(event["body"]))
+        model = MatchUserResult(**json.loads(event["body"]))
     except ValidationError as e:
         return {"statusCode": 422, "body": json.dumps(e.errors())}
 
@@ -28,6 +28,7 @@ def result(event, _):
             "pokemon": model.pokemon,
             "namespace_pokemon": f"{model.namespace}#{model.pokemon}",
             "role": model.role,
+            "moves": dict(model.moves) if model.moves else None,
             "ttl": arrow.get(model.datetime).shift(days=180).int_timestamp,
         }
     )

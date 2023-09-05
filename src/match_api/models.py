@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ResultEnum(str, Enum):
@@ -79,13 +79,18 @@ class PokemonEnum(str, Enum):
     zoroark = "zoroark"
 
 
-class MatchResult(BaseModel):
-    namespace: str = "default#result"
+class MatchUserResult(BaseModel):
+    class MoveModel(BaseModel):
+        move1: int = Field(gte=1, lte=2)
+        move2: int = Field(gte=1, lte=2)
+
+    namespace: str = "default#user_result"
     match_id: str
     user_id: str
     result: ResultEnum
     datetime: datetime
-    pokemon: PokemonEnum
+    pokemon: Optional[PokemonEnum] = None
+    moves: MoveModel = None
     role: Optional[RoleEnum] = None
 
 
