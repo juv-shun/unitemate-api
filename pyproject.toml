@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "unitemate-api"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "unitemate_api" }]
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.10"
+arrow = "^1.2.3"
+pydantic = "^2.3.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+mypy = "^1.5.1"
+boto3-stubs = "^1.28.40"
+flake8 = "^6.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
