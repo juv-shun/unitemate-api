@@ -29,7 +29,7 @@ def user_result(event, _):
             "namespace_pokemon": f"{model.namespace}#{model.pokemon}",
             "role": model.role,
             "moves": dict(model.moves) if model.moves else None,
-            "ttl": arrow.get(model.datetime).shift(days=180).int_timestamp,
+            "ttl": arrow.get(model.datetime).shift(days=60).int_timestamp,
         }
     )
 
@@ -50,7 +50,7 @@ def basic_result(event, _):
             "namespace_user_id": f"{model.namespace}#N/A",
             "timestamp": int(model.datetime.timestamp()),
             "teams": [dict(team_data) for team_data in model.teams] if model.teams else None,
-            "ttl": arrow.get(model.datetime).shift(days=180).int_timestamp,
+            "ttl": arrow.get(model.datetime).shift(days=60).int_timestamp,
         }
     )
 
