@@ -5,3 +5,130 @@ servers:
 info:
   version: 1.0.0
   title: ポケモンユナイト対戦結果集計API
+tags:
+  - name: 結果送信
+
+paths:
+  /match/result:
+    post:
+      summary: 対戦結果送信API
+      tags:
+        - 結果送信
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                match_id:
+                  type: string
+                  description: 試合ID
+                user_id:
+                  type: string
+                  description: ユーザID
+                result:
+                  type: string
+                  enum: [win, lose]
+                  description: 対戦結果
+                datetime:
+                  type: string
+                  format: date-time
+                  example: "2023-09-01T12:10:00+09:00"
+                  description: 対戦日時 (UTCフォーマット)
+                pokemon:
+                  $ref: "#/components/schemas/PokemonEnum"
+                role:
+                  type: string
+                  enum:
+                    - top_carry
+                    - top_support
+                    - bottom_carry
+                    - bottom_support
+                    - jungle
+                  description: 担当ロール
+              required:
+                - match_id
+                - user_id
+                - result
+                - datetime
+      responses:
+        "201":
+          description: Success
+        "401":
+          description: Unauthorized
+        "422":
+          description: Unprocessable Entity
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+  schemas:
+    PokemonEnum:
+      type: string
+      enum:
+        - absol
+        - aegislash
+        - azumarill
+        - blastoise
+        - blissey
+        - buzzwole
+        - chandelure
+        - charizard
+        - cinderace
+        - clefable
+        - comfey
+        - cramorant
+        - crustle
+        - decidueye
+        - delphox
+        - dodrio
+        - dragapult
+        - dragonite
+        - duraludon
+        - eldegoss
+        - espeon
+        - garchomp
+        - gardevoir
+        - gengar
+        - glaceon
+        - goodra
+        - greedent
+        - greninja
+        - hoopa
+        - inteleon
+        - lapras
+        - leafeon
+        - lucario
+        - machamp
+        - mamoswine
+        - mew
+        - mewtwo_x
+        - mewtwo_y
+        - mr_mime
+        - ninetales
+        - pikachu
+        - sableye
+        - scizor
+        - scyther
+        - slowbro
+        - snorlax
+        - sylveon
+        - talonflame
+        - trevenant
+        - tsareena
+        - tyranitar
+        - umbreon
+        - urshifu
+        - venusaur
+        - wigglytuff
+        - zacian
+        - zeraora
+        - zoroark
+      example: pikachu
+      description: 使用ポケモン名

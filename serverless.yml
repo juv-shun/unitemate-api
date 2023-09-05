@@ -10,6 +10,9 @@ provider:
     name: juv-shun.sls-deployment-store
     maxPreviousDeploymentArtifacts: 3
   logRetentionInDays: 7
+  apiGateway:
+    apiKeys:
+      - defaultKey-${sls:stage}
   iam:
     role:
       name: ${sls:stage}-${self:service}-role
@@ -38,8 +41,14 @@ package:
     - poetry.lock
 
 functions:
-  hello:
-    handler: src.hello.handler.hello
+  match_result_api:
+    name: ${sls:stage}-${self:service}-post-match-result
+    handler: src.match_api.handler.result
+    events:
+      - http:
+          path: match/result
+          method: post
+          private: true
 
 plugins:
   - serverless-prune-plugin
