@@ -1,8 +1,8 @@
 openapi: 3.0.0
 servers:
-  - url: https://dev.unitemate-api.com
+  - url: https://dev.unitemate-api.com/v1
     description: 開発環境
-  - url: https://unitemate-api.com
+  - url: https://unitemate-api.com/v1
     description: 本番環境
 info:
   version: 1.0.0
@@ -11,9 +11,9 @@ tags:
   - name: 結果送信
 
 paths:
-  /match/result:
+  /match/user_result:
     post:
-      summary: 対戦結果送信API
+      summary: ユーザ毎対戦結果 送信API
       tags:
         - 結果送信
       security:
@@ -42,6 +42,18 @@ paths:
                   description: 対戦日時 (UTCフォーマット)
                 pokemon:
                   $ref: "#/components/schemas/PokemonEnum"
+                moves:
+                  type: object
+                  description: 技の選択
+                  properties:
+                    move1:
+                      type: integer
+                      enum: [1, 2]
+                      description: 技1の選択
+                    move2:
+                      type: integer
+                      enum: [1, 2]
+                      description: 技2の選択
                 role:
                   type: string
                   enum:
@@ -63,9 +75,9 @@ paths:
           description: Unauthorized
         "422":
           description: Unprocessable Entity
-  /match/banned:
+  /match/basic_result:
     post:
-      summary: 使用禁止ポケモン送信API
+      summary: 対戦結果基本情報 送信API
       tags:
         - 結果送信
       security:
@@ -85,8 +97,32 @@ paths:
                   format: date-time
                   example: "2023-09-01T12:10:00+09:00"
                   description: 対戦日時 (UTCフォーマット)
-                pokemon:
-                  $ref: "#/components/schemas/PokemonEnum"
+                teams:
+                  type: array
+                  description: チーム毎試合結果情報
+                  items:
+                    type: object
+                    properties:
+                      result:
+                        type: string
+                        enum: [win, lose]
+                        description: 試合結果
+                      is_first_pick:
+                        type: boolean
+                        description: 先攻-true, 後攻-false
+                      banned_pokemons:
+                        type: array
+                        description: 禁止ポケモン(複数選択可)
+                        items:
+                          $ref: "#/components/schemas/PokemonEnum"
+                      picked_pokemons:
+                        type: array
+                        description: 使用ポケモン
+                        items:
+                          $ref: "#/components/schemas/PokemonEnum"
+                    required:
+                      - result
+                      - is_first_pick
               required:
                 - match_id
                 - datetime
