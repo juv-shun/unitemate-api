@@ -21,6 +21,8 @@ def user_result(event, _):
         model = MatchUserResult(**json.loads(event["body"]))
     except ValidationError as e:
         return {"statusCode": 422, "body": json.dumps(e.errors())}
+    except Exception:
+        return {"statusCode": 400}
 
     write_client = boto3.Session().client("timestream-write")
     record = {
@@ -56,6 +58,8 @@ def basic_result(event, _):
         model = MatchBasicResult(**json.loads(event["body"]))
     except ValidationError as e:
         return {"statusCode": 422, "body": json.dumps(e.errors())}
+    except Exception:
+        return {"statusCode": 400}
 
     write_client = boto3.Session().client("timestream-write")
     record = {
