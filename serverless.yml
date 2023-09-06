@@ -83,7 +83,7 @@ resources:
         TableName: row_user_results-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
-          MagneticStoreRetentionPeriodInDays: "90"
+          MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
@@ -94,7 +94,13 @@ resources:
         TableName: row_basic_results-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
-          MagneticStoreRetentionPeriodInDays: "90"
+          MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
+
+params:
+  prd:
+    magetic_store_retention_period_in_days: "90"
+  dev:
+    magetic_store_retention_period_in_days: "2"
