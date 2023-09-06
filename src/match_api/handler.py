@@ -77,7 +77,7 @@ def basic_result(event, _):
             record["MeasureValues"].append(build_record(f"team{i}_result", team.result, "VARCHAR"))
             record["MeasureValues"].append(build_record(f"team{i}_is_first_pick", str(team.is_first_pick), "BOOLEAN"))
             if team.banned_pokemons:
-                for j, pokemon in enumerate(team.picked_pokemons):
+                for j, pokemon in enumerate(team.banned_pokemons):
                     record["MeasureValues"].append(build_record(f"team{i}_banned_pokemon{j}", pokemon, "VARCHAR"))
             if team.picked_pokemons:
                 for j, pokemon in enumerate(team.picked_pokemons):
