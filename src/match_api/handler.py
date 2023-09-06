@@ -62,31 +62,31 @@ def basic_result(event, _):
         return {"statusCode": 400}
 
     write_client = boto3.Session().client("timestream-write")
-    record = {
+    common_attributes = {
         "Dimensions": [
             {"Name": "namespace", "Value": model.namespace},
             {"Name": "match_id", "Value": model.match_id},
         ],
-        "MeasureName": "basic_result",
-        "MeasureValueType": "MULTI",
         "Time": str(int(model.datetime.timestamp() * 1000)),
-        "MeasureValues": [],
+        "MeasureValueType": "MULTI",
     }
     if model.teams:
-        for i, team in enumerate(model.teams):
-            record["MeasureValues"].append(build_record(f"team{i}_result", team.result, "VARCHAR"))
-            record["MeasureValues"].append(build_record(f"team{i}_is_first_pick", str(team.is_first_pick), "BOOLEAN"))
+        for team in model.teams:
+            record = {
+                "MeasureName": f"{team.result}_team",
+                "MeasureValues": [],
+            }
+            record["MeasureValues"].append(build_record("first_pick", str(team.is_first_pick), "VARCHAR"))
             if team.banned_pokemons:
-                for j, pokemon in enumerate(team.banned_pokemons):
-                    record["MeasureValues"].append(build_record(f"team{i}_banned_pokemon{j}", pokemon, "VARCHAR"))
+                for i, pokemon in enumerate(team.banned_pokemons):
+                    record["MeasureValues"].append(build_record(f"banned_pokemons{i}", str(pokemon), "VARCHAR"))
             if team.picked_pokemons:
-                for j, pokemon in enumerate(team.picked_pokemons):
-                    record["MeasureValues"].append(build_record(f"team{i}_picked_pokemon{j}", pokemon, "VARCHAR"))
+                for i, pokemon in enumerate(team.picked_pokemons):
+                    record["MeasureValues"].append(build_record(f"picked_pokemons{i}", str(pokemon), "VARCHAR"))
         write_client.write_records(
             DatabaseName=TIMESTREAM_DB_NAME,
             TableName=BASIC_RESULT_TABLE,
-            CommonAttributes={},
+            CommonAttributes=common_attributes,
             Records=[record],
         )
-
     return {"statusCode": 201, "body": None}
