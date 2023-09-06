@@ -43,12 +43,20 @@ def user_result(event, _):
     if model.moves:
         record["MeasureValues"].append(build_record("move1", str(model.moves.move1), "VARCHAR"))
         record["MeasureValues"].append(build_record("move2", str(model.moves.move2), "VARCHAR"))
-    write_client.write_records(
-        DatabaseName=TIMESTREAM_DB_NAME,
-        TableName=USER_RESULT_TABLE,
-        CommonAttributes={},
-        Records=[record],
-    )
+
+    try:
+        write_client.write_records(
+            DatabaseName=TIMESTREAM_DB_NAME,
+            TableName=USER_RESULT_TABLE,
+            CommonAttributes={},
+            Records=[record],
+        )
+    except write_client.exceptions.RejectedRecordsException as err:
+        print("[ERROR] Records insertion failed.")
+        for rr in err.response["RejectedRecords"]:
+            print(f"Rejected Index {rr['RecordIndex']}: {rr['Reason']}")
+            print(f"Record: {json.dumps(record)}")
+            raise
 
     return {"statusCode": 201, "body": None}
 
@@ -85,10 +93,19 @@ def basic_result(event, _):
                 for i, pokemon in enumerate(team.picked_pokemons):
                     record["MeasureValues"].append(build_record(f"picked_pokemon_{i}", pokemon, "VARCHAR"))
             records.append(record)
-        write_client.write_records(
-            DatabaseName=TIMESTREAM_DB_NAME,
-            TableName=BASIC_RESULT_TABLE,
-            CommonAttributes=common_attributes,
-            Records=records,
-        )
+
+        try:
+            write_client.write_records(
+                DatabaseName=TIMESTREAM_DB_NAME,
+                TableName=BASIC_RESULT_TABLE,
+                CommonAttributes=common_attributes,
+                Records=records,
+            )
+        except write_client.exceptions.RejectedRecordsException as err:
+            print("[ERROR] Records insertion failed.")
+            for rr in err.response["RejectedRecords"]:
+                print(f"Rejected Index {rr['RecordIndex']}: {rr['Reason']}")
+                print(f"Record: {json.dumps(record)}")
+            raise
+
     return {"statusCode": 201, "body": None}
