@@ -71,6 +71,7 @@ def basic_result(event, _):
         "MeasureValueType": "MULTI",
     }
     if model.teams:
+        records = []
         for team in model.teams:
             record = {
                 "MeasureName": f"{team.result}_team",
@@ -79,14 +80,15 @@ def basic_result(event, _):
             record["MeasureValues"].append(build_record("first_pick", str(team.is_first_pick), "VARCHAR"))
             if team.banned_pokemons:
                 for i, pokemon in enumerate(team.banned_pokemons):
-                    record["MeasureValues"].append(build_record(f"banned_pokemons{i}", str(pokemon), "VARCHAR"))
+                    record["MeasureValues"].append(build_record(f"banned_pokemon_{i}", pokemon, "VARCHAR"))
             if team.picked_pokemons:
                 for i, pokemon in enumerate(team.picked_pokemons):
-                    record["MeasureValues"].append(build_record(f"picked_pokemons{i}", str(pokemon), "VARCHAR"))
+                    record["MeasureValues"].append(build_record(f"picked_pokemon_{i}", pokemon, "VARCHAR"))
+            records.append(record)
         write_client.write_records(
             DatabaseName=TIMESTREAM_DB_NAME,
             TableName=BASIC_RESULT_TABLE,
             CommonAttributes=common_attributes,
-            Records=[record],
+            Records=records,
         )
     return {"statusCode": 201, "body": None}
