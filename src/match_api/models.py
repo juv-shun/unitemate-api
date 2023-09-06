@@ -84,7 +84,7 @@ class MatchUserResult(BaseModel):
         move1: int = Field(gte=1, lte=2)
         move2: int = Field(gte=1, lte=2)
 
-    namespace: str = "default#user_result"
+    namespace: str = "default"
     match_id: str
     user_id: str
     result: ResultEnum
@@ -101,7 +101,7 @@ class MatchBasicResult(BaseModel):
         banned_pokemons: Optional[List[PokemonEnum]] = Field(min_length=1, max_length=1)
         picked_pokemons: Optional[List[PokemonEnum]] = Field(min_length=5, max_length=5)
 
-    namespace: str = "default#basic_result"
+    namespace: str = "default"
     match_id: str
     datetime: datetime
     teams: Optional[List[TeamModel]] = Field(None, min_length=2, max_length=2)

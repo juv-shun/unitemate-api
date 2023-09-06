@@ -19,18 +19,19 @@ provider:
       statements:
         - Effect: Allow
           Action:
-            - dynamodb:*
+            - timestream:DescribeEndpoints
           Resource:
-            - !GetAtt UnitemateMatchResultOriginTable.Arn
+            - "*"
         - Effect: Allow
           Action:
-            - s3:*
+            - timestream:*
           Resource:
-            - !GetAtt UnitemateAggregationResultBucket.Arn
-            - !Join ["", [!GetAtt UnitemateAggregationResultBucket.Arn, "/*"]]
+            - !GetAtt UnitemateTimeStreamDB.Arn
+            - !Join ["", [!GetAtt UnitemateTimeStreamDB.Arn, "/*"]]
   environment:
-    DYNAMODB_TABLE: !Ref UnitemateMatchResultOriginTable
-    S3_BUCKET_NAME: !Ref UnitemateAggregationResultBucket
+    TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
+    USER_RESULT_TABLE: row_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
+    BASIC_RESULT_TABLE: row_basic_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
 
 package:
   individually: true
@@ -71,54 +72,29 @@ custom:
 
 resources:
   Resources:
-    UnitemateMatchResultOriginTable:
-      Type: AWS::DynamoDB::Table
+    UnitemateTimeStreamDB:
+      Type: AWS::Timestream::Database
       Properties:
-        TableName: ${sls:stage}-unitemate-match-result-origin
-        AttributeDefinitions:
-          - AttributeName: namespace
-            AttributeType: "S"
-          - AttributeName: timestamp
-            AttributeType: "N"
-          - AttributeName: namespace_user_id
-            AttributeType: "S"
-        KeySchema:
-          - AttributeName: namespace
-            KeyType: HASH
-          - AttributeName: timestamp
-            KeyType: RANGE
-        GlobalSecondaryIndexes:
-          - IndexName: namespace_user_id-timestamp-index
-            KeySchema:
-              - AttributeName: namespace_user_id
-                KeyType: HASH
-              - AttributeName: timestamp
-                KeyType: RANGE
-            Projection:
-              ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
-        TimeToLiveSpecification:
-          AttributeName: ttl
-          Enabled: true
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-    UnitemateAggregationResultBucket:
-      Type: AWS::S3::Bucket
+        DatabaseName: unitemate-${sls:stage}
+    UnitemateTimeStreamUserResultTable:
+      Type: AWS::Timestream::Table
       Properties:
-        BucketName: ${sls:stage}-unitemate-match-result-aggregation
-        AccessControl: Private
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: True
-          BlockPublicPolicy: True
-          IgnorePublicAcls: True
-          RestrictPublicBuckets: True
-        LifecycleConfiguration:
-          Rules:
-            - Id: ArchivedRule
-              Status: Enabled
-              Transitions:
-                - TransitionInDays: 90
-                  StorageClass: DEEP_ARCHIVE
+        DatabaseName: !Ref UnitemateTimeStreamDB
+        TableName: row_user_results-${sls:stage}
+        RetentionProperties:
+          MemoryStoreRetentionPeriodInHours: "1"
+          MagneticStoreRetentionPeriodInDays: "90"
+        MagneticStoreWriteProperties:
+          EnableMagneticStoreWrites: true
+          MagneticStoreRejectedDataLocation: {}
+    UnitemateTimeStreamBaseResultTable:
+      Type: AWS::Timestream::Table
+      Properties:
+        DatabaseName: !Ref UnitemateTimeStreamDB
+        TableName: row_basic_results-${sls:stage}
+        RetentionProperties:
+          MemoryStoreRetentionPeriodInHours: "1"
+          MagneticStoreRetentionPeriodInDays: "90"
+        MagneticStoreWriteProperties:
+          EnableMagneticStoreWrites: true
+          MagneticStoreRejectedDataLocation: {}
