@@ -8,7 +8,6 @@ packages = [{ include = "unitemate_api" }]
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.10"
-arrow = "^1.2.3"
 pydantic = "^2.3.0"
 
 
