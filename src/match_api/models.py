@@ -104,4 +104,4 @@ class MatchBasicResult(BaseModel):
     namespace: str = "default"
     match_id: str
     datetime: datetime
-    teams: Optional[List[TeamModel]] = Field(None, min_length=2, max_length=2)
+    teams: List[TeamModel] = Field(..., min_length=2, max_length=2)

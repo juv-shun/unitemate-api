@@ -126,7 +126,7 @@ paths:
               required:
                 - match_id
                 - datetime
-                - pokemon
+                - teams
       responses:
         "201":
           description: Success
