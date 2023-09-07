@@ -38,6 +38,7 @@ provider:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
     USER_RESULT_TABLE: row_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
     BASIC_RESULT_TABLE: row_basic_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
+    POKEMON_AGGREGATION_TABLE: pokemon-aggregation-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationTable
 
 package:
   individually: true
@@ -108,6 +109,17 @@ resources:
       Properties:
         DatabaseName: !Ref UnitemateTimeStreamDB
         TableName: row_basic_results-${sls:stage}
+        RetentionProperties:
+          MemoryStoreRetentionPeriodInHours: "1"
+          MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
+        MagneticStoreWriteProperties:
+          EnableMagneticStoreWrites: true
+          MagneticStoreRejectedDataLocation: {}
+    UnitemateTimeStreamAggregationTable:
+      Type: AWS::Timestream::Table
+      Properties:
+        DatabaseName: !Ref UnitemateTimeStreamDB
+        TableName: pokemon-aggregation-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
           MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
