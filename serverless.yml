@@ -28,6 +28,12 @@ provider:
           Resource:
             - !GetAtt UnitemateTimeStreamDB.Arn
             - !Join ["", [!GetAtt UnitemateTimeStreamDB.Arn, "/*"]]
+        - Effect: Allow
+          Action:
+            - s3:*
+          Resource:
+            - !GetAtt UnitemateCSVExportBucket.Arn
+            - !Join ["", [!GetAtt UnitemateCSVExportBucket.Arn, "/*"]]
   environment:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
     USER_RESULT_TABLE: row_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
@@ -58,6 +64,16 @@ functions:
           path: v1/match/basic_result
           method: post
           private: true
+  csv_export_origin:
+    name: ${sls:stage}-${self:service}-csv-export-origin
+    handler: src.csv_export.handler.origin
+    environment:
+      EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
+    events:
+      - schedule:
+          name: ${self:service}-export-time-${sls:stage}
+          description: Night Export Batch Event for ${self:service}
+          rate: cron(0 1 * * ? *)
 
 plugins:
   - serverless-prune-plugin
@@ -98,6 +114,21 @@ resources:
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
+    UnitemateCSVExportBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:service}-export-files-${sls:stage}
+        AccessControl: Private
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: True
+          BlockPublicPolicy: True
+          IgnorePublicAcls: True
+          RestrictPublicBuckets: True
+        LifecycleConfiguration:
+          Rules:
+            - Id: ExpirationRule
+              Status: Enabled
+              ExpirationInDays: 90
 
 params:
   prd:
