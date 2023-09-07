@@ -141,6 +141,10 @@ resources:
             - Id: ExpirationRule
               Status: Enabled
               ExpirationInDays: 90
+    UnitemateSNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:service}-scheduled-query-topic
 
 params:
   prd:
