@@ -15,7 +15,7 @@ provider:
       - defaultKey-${sls:stage}
   iam:
     role:
-      name: ${sls:stage}-${self:service}-role
+      name: ${self:service}-role-${sls:stage}
       statements:
         - Effect: Allow
           Action:
@@ -36,9 +36,9 @@ provider:
             - !Join ["", [!GetAtt UnitemateCSVExportBucket.Arn, "/*"]]
   environment:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
-    USER_RESULT_TABLE: row_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
-    BASIC_RESULT_TABLE: row_basic_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
-    POKEMON_AGGREGATION_TABLE: pokemon-aggregation-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationTable
+    USER_RESULT_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
+    BASIC_RESULT_TABLE: origin_basic_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
+    POKEMON_AGGREGATION_TABLE: aggregation-pokemon-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationTable
 
 package:
   individually: true
@@ -50,7 +50,7 @@ package:
 
 functions:
   match_user_result:
-    name: ${sls:stage}-${self:service}-user-result
+    name: ${self:service}-user-result-${sls:stage}
     handler: src.match_api.handler.user_result
     events:
       - http:
@@ -58,7 +58,7 @@ functions:
           method: post
           private: true
   match_basic_result:
-    name: ${sls:stage}-${self:service}-basic-result
+    name: ${self:service}-basic-result-${sls:stage}
     handler: src.match_api.handler.basic_result
     events:
       - http:
@@ -66,7 +66,7 @@ functions:
           method: post
           private: true
   csv_export_origin:
-    name: ${sls:stage}-${self:service}-csv-export-origin
+    name: ${self:service}-csv-export-origin-${sls:stage}
     handler: src.csv_export.handler.origin
     environment:
       EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
@@ -92,12 +92,12 @@ resources:
     UnitemateTimeStreamDB:
       Type: AWS::Timestream::Database
       Properties:
-        DatabaseName: unitemate-${sls:stage}
+        DatabaseName: ${self:service}-${sls:stage}
     UnitemateTimeStreamUserResultTable:
       Type: AWS::Timestream::Table
       Properties:
         DatabaseName: !Ref UnitemateTimeStreamDB
-        TableName: row_user_results-${sls:stage}
+        TableName: origin_user_results-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
           MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
@@ -108,7 +108,7 @@ resources:
       Type: AWS::Timestream::Table
       Properties:
         DatabaseName: !Ref UnitemateTimeStreamDB
-        TableName: row_basic_results-${sls:stage}
+        TableName: origin_basic_results-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
           MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
@@ -119,7 +119,7 @@ resources:
       Type: AWS::Timestream::Table
       Properties:
         DatabaseName: !Ref UnitemateTimeStreamDB
-        TableName: pokemon-aggregation-${sls:stage}
+        TableName: aggregation-pokemon-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
           MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
@@ -144,7 +144,7 @@ resources:
     UnitemateSNSTopic:
       Type: AWS::SNS::Topic
       Properties:
-        TopicName: ${self:service}-scheduled-query-topic
+        TopicName: ${self:service}-scheduled-query-topic-${sls:stage}
 
 params:
   prd:
