@@ -79,6 +79,7 @@ functions:
 plugins:
   - serverless-prune-plugin
   - serverless-python-requirements
+  - serverless-domain-manager
 
 custom:
   prune:
