@@ -87,6 +87,11 @@ custom:
     number: 3
   pythonRequirements:
     dockerizePip: true
+  customDomain:
+    domainName: ${param:domain_name}
+    stage: ${sls:stage}
+    certificateArn: ${ssm:/unitemate-api-${sls:stage}/certification_arn}
+    endpointType: REGIONAL
 
 resources:
   Resources:
@@ -150,5 +155,7 @@ resources:
 params:
   prd:
     magetic_store_retention_period_in_days: "90"
+    domain_name: unitemate-api.com
   dev:
     magetic_store_retention_period_in_days: "2"
+    domain_name: dev.unitemate-api.com
