@@ -7,7 +7,7 @@ provider:
   region: ap-northeast-1
   stackName: ${sls:stage}-${self:service}-stack
   deploymentBucket:
-    name: juv-shun.sls-deployment-store
+    name: ${ssm:/${self:service}/sls-deployment-bucket}
     maxPreviousDeploymentArtifacts: 3
   logRetentionInDays: 7
   apiGateway:
@@ -88,9 +88,9 @@ custom:
   pythonRequirements:
     dockerizePip: true
   customDomain:
-    domainName: ${param:domain_name}
+    domainName: ${ssm:/${self:service}-${sls:stage}/domain_name}
     stage: ${sls:stage}
-    certificateArn: ${ssm:/unitemate-api-${sls:stage}/certification_arn}
+    certificateArn: ${ssm:/${self:service}-${sls:stage}/certification_arn}
     endpointType: REGIONAL
 
 resources:
@@ -155,7 +155,5 @@ resources:
 params:
   prd:
     magetic_store_retention_period_in_days: "90"
-    domain_name: unitemate-api.com
   dev:
     magetic_store_retention_period_in_days: "2"
-    domain_name: dev.unitemate-api.com
