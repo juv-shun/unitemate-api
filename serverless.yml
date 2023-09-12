@@ -3,6 +3,7 @@ frameworkVersion: "3"
 
 provider:
   name: aws
+  endpointType: REGIONAL
   runtime: python3.9
   region: ap-northeast-1
   stackName: ${sls:stage}-${self:service}-stack
