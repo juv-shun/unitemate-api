@@ -38,8 +38,6 @@ def user_result(event, _):
     record["MeasureValues"].append(build_record("result", model.result, "VARCHAR"))
     if model.pokemon:
         record["MeasureValues"].append(build_record("pokemon", model.pokemon, "VARCHAR"))
-    if model.role:
-        record["MeasureValues"].append(build_record("role", model.role, "VARCHAR"))
     if model.moves:
         record["MeasureValues"].append(build_record("move1", str(model.moves.move1), "VARCHAR"))
         record["MeasureValues"].append(build_record("move2", str(model.moves.move2), "VARCHAR"))

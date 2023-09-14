@@ -54,15 +54,6 @@ paths:
                       type: integer
                       enum: [1, 2]
                       description: 技2の選択
-                role:
-                  type: string
-                  enum:
-                    - top_carry
-                    - top_support
-                    - bottom_carry
-                    - bottom_support
-                    - jungle
-                  description: 担当ロール
               required:
                 - match_id
                 - user_id

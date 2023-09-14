@@ -10,14 +10,6 @@ class ResultEnum(str, Enum):
     lose = "lose"
 
 
-class RoleEnum(str, Enum):
-    top_carry = "top_carry"
-    top_support = "top_support"
-    bottom_carry = "bottom_carry"
-    bottom_support = "bottom_support"
-    jungle = "jungle"
-
-
 class PokemonEnum(str, Enum):
     absol = "absol"
     aegislash = "aegislash"
@@ -93,7 +85,6 @@ class MatchUserResult(BaseModel):
     datetime: datetime
     pokemon: Optional[PokemonEnum] = None
     moves: MoveModel = None
-    role: Optional[RoleEnum] = None
 
 
 class MatchBasicResult(BaseModel):
