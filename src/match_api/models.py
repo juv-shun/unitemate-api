@@ -85,6 +85,8 @@ class MatchUserResult(BaseModel):
     datetime: datetime
     pokemon: Optional[PokemonEnum] = None
     moves: Optional[MoveModel] = None
+    is_first_pick: Optional[bool] = None
+    banned_pokemons: Optional[List[PokemonEnum]] = None
 
 
 class MatchBasicResult(BaseModel):

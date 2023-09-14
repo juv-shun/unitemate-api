@@ -52,6 +52,13 @@ paths:
                     move2:
                       type: string
                       description: 技2の選択
+                is_first_pick:
+                  type: boolean
+                  description: 先攻 / 後攻
+                banned_pokemons:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PokemonEnum"
               required:
                 - match_id
                 - user_id

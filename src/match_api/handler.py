@@ -41,6 +41,11 @@ def user_result(event, _):
     if model.moves:
         record["MeasureValues"].append(build_record("move1", str(model.moves.move1), "VARCHAR"))
         record["MeasureValues"].append(build_record("move2", str(model.moves.move2), "VARCHAR"))
+    if model.is_first_pick is not None:
+        record["MeasureValues"].append(build_record("is_first_pick", str(model.is_first_pick), "BOOLEAN"))
+    if model.banned_pokemons:
+        for i, pokemon in enumerate(model.banned_pokemons):
+            record["MeasureValues"].append(build_record(f"banned_pokemon_{i}", pokemon, "VARCHAR"))
 
     try:
         write_client.write_records(
