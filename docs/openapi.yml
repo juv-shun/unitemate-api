@@ -59,6 +59,9 @@ paths:
                   type: array
                   items:
                     $ref: "#/components/schemas/PokemonEnum"
+                rate:
+                  type: integer
+                  description: 現在レート
               required:
                 - match_id
                 - user_id

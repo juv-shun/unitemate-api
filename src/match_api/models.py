@@ -87,3 +87,4 @@ class MatchUserResult(BaseModel):
     moves: Optional[MoveModel] = None
     is_first_pick: Optional[bool] = None
     banned_pokemons: Optional[List[PokemonEnum]] = None
+    rate: Optional[int] = None

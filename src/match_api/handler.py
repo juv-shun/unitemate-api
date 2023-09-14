@@ -45,6 +45,8 @@ def user_result(event, _):
     if model.banned_pokemons:
         for i, pokemon in enumerate(model.banned_pokemons):
             record["MeasureValues"].append(build_record(f"banned_pokemon_{i}", pokemon, "VARCHAR"))
+    if model.rate:
+        record["MeasureValues"].append(build_record("rate", str(model.rate), "BIGINT"))
 
     try:
         write_client.write_records(
