@@ -47,12 +47,10 @@ paths:
                   description: 技の選択
                   properties:
                     move1:
-                      type: integer
-                      enum: [1, 2]
+                      type: string
                       description: 技1の選択
                     move2:
-                      type: integer
-                      enum: [1, 2]
+                      type: string
                       description: 技2の選択
               required:
                 - match_id

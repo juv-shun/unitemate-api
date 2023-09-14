@@ -75,8 +75,8 @@ class PokemonEnum(str, Enum):
 
 class MatchUserResult(BaseModel):
     class MoveModel(BaseModel):
-        move1: int = Field(gte=1, lte=2)
-        move2: int = Field(gte=1, lte=2)
+        move1: str
+        move2: str
 
     namespace: str = "default"
     match_id: str
@@ -84,7 +84,7 @@ class MatchUserResult(BaseModel):
     result: ResultEnum
     datetime: datetime
     pokemon: Optional[PokemonEnum] = None
-    moves: MoveModel = None
+    moves: Optional[MoveModel] = None
 
 
 class MatchBasicResult(BaseModel):
