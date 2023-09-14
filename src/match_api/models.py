@@ -87,16 +87,3 @@ class MatchUserResult(BaseModel):
     moves: Optional[MoveModel] = None
     is_first_pick: Optional[bool] = None
     banned_pokemons: Optional[List[PokemonEnum]] = None
-
-
-class MatchBasicResult(BaseModel):
-    class TeamModel(BaseModel):
-        result: ResultEnum
-        is_first_pick: bool
-        banned_pokemons: Optional[List[PokemonEnum]] = Field(None, min_length=1, max_length=1)
-        picked_pokemons: Optional[List[PokemonEnum]] = Field(None, min_length=5, max_length=5)
-
-    namespace: str = "default"
-    match_id: str
-    datetime: datetime
-    teams: List[TeamModel] = Field(..., min_length=2, max_length=2)

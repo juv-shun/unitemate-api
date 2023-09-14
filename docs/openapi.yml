@@ -13,7 +13,7 @@ tags:
 paths:
   /match/user_result:
     post:
-      summary: ユーザ毎対戦結果 送信API
+      summary: 対戦結果 送信API
       tags:
         - 結果送信
       security:
@@ -64,65 +64,6 @@ paths:
                 - user_id
                 - result
                 - datetime
-      responses:
-        "201":
-          description: Success
-        "401":
-          description: Unauthorized
-        "422":
-          description: Unprocessable Entity
-  /match/basic_result:
-    post:
-      summary: 対戦結果基本情報 送信API
-      tags:
-        - 結果送信
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                match_id:
-                  type: string
-                  description: 試合ID
-                datetime:
-                  type: string
-                  format: date-time
-                  example: "2023-09-01T12:10:00+09:00"
-                  description: 対戦日時 (UTCフォーマット)
-                teams:
-                  type: array
-                  description: チーム毎試合結果情報
-                  items:
-                    type: object
-                    properties:
-                      result:
-                        type: string
-                        enum: [win, lose]
-                        description: 試合結果
-                      is_first_pick:
-                        type: boolean
-                        description: 先攻-true, 後攻-false
-                      banned_pokemons:
-                        type: array
-                        description: 禁止ポケモン(複数選択可)
-                        items:
-                          $ref: "#/components/schemas/PokemonEnum"
-                      picked_pokemons:
-                        type: array
-                        description: 使用ポケモン
-                        items:
-                          $ref: "#/components/schemas/PokemonEnum"
-                    required:
-                      - result
-                      - is_first_pick
-              required:
-                - match_id
-                - datetime
-                - teams
       responses:
         "201":
           description: Success

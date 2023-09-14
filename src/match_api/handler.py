@@ -5,11 +5,10 @@ from typing import Any, Dict
 import boto3
 from pydantic import ValidationError
 
-from .models import MatchBasicResult, MatchUserResult
+from .models import MatchUserResult
 
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
 USER_RESULT_TABLE = os.environ["USER_RESULT_TABLE"]
-BASIC_RESULT_TABLE = os.environ["BASIC_RESULT_TABLE"]
 
 
 def build_record(name: str, value, type: str) -> Dict[str, Any]:
@@ -60,54 +59,5 @@ def user_result(event, _):
             print(f"Rejected Index {rr['RecordIndex']}: {rr['Reason']}")
             print(f"Record: {json.dumps(record)}")
             raise
-
-    return {"statusCode": 201, "body": None}
-
-
-def basic_result(event, _):
-    try:
-        model = MatchBasicResult(**json.loads(event["body"]))
-    except ValidationError as e:
-        return {"statusCode": 422, "body": json.dumps(e.errors())}
-    except Exception:
-        return {"statusCode": 400}
-
-    write_client = boto3.Session().client("timestream-write")
-    common_attributes = {
-        "Dimensions": [
-            {"Name": "namespace", "Value": model.namespace},
-            {"Name": "match_id", "Value": model.match_id},
-        ],
-        "Time": str(int(model.datetime.timestamp() * 1000)),
-        "MeasureValueType": "MULTI",
-    }
-    records = []
-    for team in model.teams:
-        record = {
-            "MeasureName": f"{team.result}_team",
-            "MeasureValues": [],
-        }
-        record["MeasureValues"].append(build_record("first_pick", str(team.is_first_pick), "BOOLEAN"))
-        if team.banned_pokemons:
-            for i, pokemon in enumerate(team.banned_pokemons):
-                record["MeasureValues"].append(build_record(f"banned_pokemon_{i}", pokemon, "VARCHAR"))
-        if team.picked_pokemons:
-            for i, pokemon in enumerate(team.picked_pokemons):
-                record["MeasureValues"].append(build_record(f"picked_pokemon_{i}", pokemon, "VARCHAR"))
-        records.append(record)
-
-    try:
-        write_client.write_records(
-            DatabaseName=TIMESTREAM_DB_NAME,
-            TableName=BASIC_RESULT_TABLE,
-            CommonAttributes=common_attributes,
-            Records=records,
-        )
-    except write_client.exceptions.RejectedRecordsException as err:
-        print("[ERROR] Records insertion failed.")
-        for rr in err.response["RejectedRecords"]:
-            print(f"Rejected Index {rr['RecordIndex']}: {rr['Reason']}")
-            print(f"Record: {json.dumps(record)}")
-        raise
 
     return {"statusCode": 201, "body": None}
