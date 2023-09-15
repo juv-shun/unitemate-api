@@ -33,11 +33,12 @@ def user_result(event, _):
         "MeasureName": "user_result",
         "MeasureValueType": "MULTI",
         "Time": str(int(model.datetime.timestamp() * 1000)),
-        "MeasureValues": [],
+        "MeasureValues": [
+            build_record("winner", model.winner, "VARCHAR"),
+            build_record("pokemon", model.pokemon, "VARCHAR"),
+            build_record("is_first_pick", str(model.is_first_pick), "BOOLEAN"),
+        ],
     }
-    record["MeasureValues"].append(build_record("winner", model.winner, "VARCHAR"))
-    record["MeasureValues"].append(build_record("pokemon", model.pokemon, "VARCHAR"))
-    record["MeasureValues"].append(build_record("is_first_pick", str(model.is_first_pick), "BOOLEAN"))
     if model.moves:
         record["MeasureValues"].append(build_record("move1", str(model.moves.move1), "VARCHAR"))
         record["MeasureValues"].append(build_record("move2", str(model.moves.move2), "VARCHAR"))
