@@ -67,6 +67,8 @@ paths:
                 - user_id
                 - result
                 - datetime
+                - pokemon
+                - is_first_pick
       responses:
         "201":
           description: Success
