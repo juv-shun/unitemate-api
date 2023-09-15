@@ -34,7 +34,7 @@ def user_result(event, _):
         "Time": str(int(model.datetime.timestamp() * 1000)),
         "MeasureValues": [],
     }
-    record["MeasureValues"].append(build_record("result", model.result, "VARCHAR"))
+    record["MeasureValues"].append(build_record("winner", model.winner, "VARCHAR"))
     record["MeasureValues"].append(build_record("pokemon", model.pokemon, "VARCHAR"))
     record["MeasureValues"].append(build_record("is_first_pick", str(model.is_first_pick), "BOOLEAN"))
     if model.moves:

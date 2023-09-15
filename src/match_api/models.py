@@ -2,12 +2,13 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class ResultEnum(str, Enum):
-    win = "win"
-    lose = "lose"
+class WinnerEnum(str, Enum):
+    first = "first"
+    second = "second"
+    invalid = "invalid"
 
 
 class PokemonEnum(str, Enum):
@@ -81,7 +82,7 @@ class MatchUserResult(BaseModel):
     namespace: str = "default"
     match_id: str
     user_id: str
-    result: ResultEnum
+    winner: WinnerEnum
     datetime: datetime
     pokemon: PokemonEnum
     moves: Optional[MoveModel] = None

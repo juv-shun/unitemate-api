@@ -31,10 +31,10 @@ paths:
                 user_id:
                   type: string
                   description: ユーザID
-                result:
+                winner:
                   type: string
-                  enum: [win, lose]
-                  description: 対戦結果
+                  enum: [first, second, invalid]
+                  description: 勝利チーム(先攻/後攻)
                 datetime:
                   type: string
                   format: date-time
@@ -65,7 +65,7 @@ paths:
               required:
                 - match_id
                 - user_id
-                - result
+                - winner
                 - datetime
                 - pokemon
                 - is_first_pick
