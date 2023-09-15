@@ -28,6 +28,7 @@ def user_result(event, _):
         "Dimensions": [
             {"Name": "namespace", "Value": model.namespace},
             {"Name": "user_id", "Value": model.user_id},
+            {"Name": "match_id", "Value": model.match_id},
         ],
         "MeasureName": "user_result",
         "MeasureValueType": "MULTI",
