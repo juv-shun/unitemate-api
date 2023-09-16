@@ -64,8 +64,18 @@ functions:
       EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
     events:
       - schedule:
-          name: ${self:service}-export-time-${sls:stage}
-          description: Night Export Batch Event for ${self:service}
+          name: ${self:service}-origin-export-time-${sls:stage}
+          description: Origin CSV Export Batch Event for ${self:service}
+          rate: cron(0 1 * * ? *)
+  csv_export_aggregation:
+    name: ${self:service}-csv-export-aggregation-${sls:stage}
+    handler: src.csv_export.handler.aggregate
+    environment:
+      EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
+    events:
+      - schedule:
+          name: ${self:service}-aggregation-export-time-${sls:stage}
+          description: Aggregation CSV Export Batch Event for ${self:service}
           rate: cron(0 1 * * ? *)
 
 plugins:
