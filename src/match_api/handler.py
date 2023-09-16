@@ -19,6 +19,7 @@ def user_result(event, _):
     try:
         model = MatchUserResult(**json.loads(event["body"]))
     except ValidationError as e:
+        print("ERROR: " + json.dumps(e.errors()))
         return {"statusCode": 422, "body": json.dumps(e.errors())}
     except Exception:
         return {"statusCode": 400}
