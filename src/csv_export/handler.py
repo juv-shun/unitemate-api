@@ -52,10 +52,10 @@ def aggregate(_, __):
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["英語名", "日付", "勝利数", "敗戦数", "ピック数", "使用禁止数", "対戦総数", "ポケモン"])
+            writer.writerow(["ポケモン", "英語名", "日付", "勝利数", "敗戦数", "ピック数", "使用禁止数", "対戦総数"])
             for row in response["Rows"]:
                 record = [data["ScalarValue"] for data in row["Data"]]
-                record.append(pokemon_names[record[0]])
+                record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
         s3.upload_file(
             tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_by_pokemon_{yesterday}.csv"
@@ -73,10 +73,10 @@ def aggregate(_, __):
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["英語名", "技1", "技2", "日付", "勝利数", "敗戦数", "ピック数", "対戦総数", "ポケモン"])
+            writer.writerow(["ポケモン", "英語名", "技1", "技2", "日付", "勝利数", "敗戦数", "ピック数", "対戦総数"])
             for row in response["Rows"]:
                 record = [data["ScalarValue"] for data in row["Data"]]
-                record.append(pokemon_names[record[0]])
+                record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
 
         s3.upload_file(
