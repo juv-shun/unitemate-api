@@ -1,8 +1,10 @@
 import csv
+import json
 import os
 import re
 import tempfile
 from datetime import date, timedelta
+from pathlib import Path
 
 import boto3
 
@@ -33,6 +35,11 @@ def origin(_, __):
 
 
 def aggregate(_, __):
+    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
+        pokemon_names = json.load(fr)
+
     with tempfile.TemporaryDirectory() as tmpdirname:
         query = f"""
         SELECT pokemon, date(time) AS date, picked_win, picked_lose, picked_total, banned, match_total
@@ -45,11 +52,14 @@ def aggregate(_, __):
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["ポケモン", "日付", "勝利数", "敗戦数", "ピック数", "使用禁止数", "対戦総数"])
+            writer.writerow(["英語名", "日付", "勝利数", "敗戦数", "ピック数", "使用禁止数", "対戦総数", "ポケモン"])
             for row in response["Rows"]:
-                writer.writerow([data["ScalarValue"] for data in row["Data"]])
-        today = date.today().strftime("%Y-%m-%d")
-        s3.upload_file(tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{today}/aggregate_by_pokemon.csv")
+                record = [data["ScalarValue"] for data in row["Data"]]
+                record.append(pokemon_names[record[0]])
+                writer.writerow(record)
+        s3.upload_file(
+            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_by_pokemon_{yesterday}.csv"
+        )
         print("aggregate_by_pokemon.csv completed.")
 
         query = f"""
@@ -63,11 +73,15 @@ def aggregate(_, __):
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["ポケモン", "技1", "技2", "日付", "勝利数", "敗戦数", "ピック数", "対戦総数"])
+            writer.writerow(["英語名", "技1", "技2", "日付", "勝利数", "敗戦数", "ピック数", "対戦総数", "ポケモン"])
             for row in response["Rows"]:
-                writer.writerow([data["ScalarValue"] for data in row["Data"]])
-        today = date.today().strftime("%Y-%m-%d")
-        s3.upload_file(tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{today}/aggregate_by_pokemon_move.csv")
+                record = [data["ScalarValue"] for data in row["Data"]]
+                record.append(pokemon_names[record[0]])
+                writer.writerow(record)
+
+        s3.upload_file(
+            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_by_pokemon_move_{yesterday}.csv"
+        )
         print("aggregate_by_pokemon_move.csv completed.")
 
         query = f"""
@@ -81,9 +95,12 @@ def aggregate(_, __):
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["ポケモン", "ピック順", "日付", "使用禁止数"])
+            writer.writerow(["英語名", "ピック順", "日付", "使用禁止数", "ポケモン"])
             for row in response["Rows"]:
-                writer.writerow([data["ScalarValue"] for data in row["Data"]])
-        today = date.today().strftime("%Y-%m-%d")
-        s3.upload_file(tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{today}/aggregate_banned_pokemon.csv")
+                record = [data["ScalarValue"] for data in row["Data"]]
+                record.append(pokemon_names[record[0]])
+                writer.writerow(record)
+        s3.upload_file(
+            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_banned_pokemon_{yesterday}.csv"
+        )
         print("aggregate_banned_pokemon.csv completed.")
