@@ -85,22 +85,21 @@ def aggregate(_, __):
         print("aggregate_by_pokemon_move.csv completed.")
 
         query = f"""
-        SELECT pokemon, pick_order, date(time) AS date, banned
+        SELECT match_id, pick_order, date(time) AS date, winner, banned_pokemon
         FROM "{TIMESTREAM_DB_NAME}"."{POKEMON_AGGREGATION_TABLE}"
-        WHERE time = bin(now(), 1d) - 1d AND measure_name = 'aggregate_banned_pokemon'
-        ORDER BY banned DESC
+        WHERE time = bin(now(), 1d) - 1d AND measure_name = 'aggregate_match'
+        ORDER BY match_id
         """
         response = client.query(QueryString=query)
 
         tmpfile = os.path.join(tmpdirname, "tmp.csv")
         with open(tmpfile, "wt") as fw:
             writer = csv.writer(fw)
-            writer.writerow(["英語名", "ピック順", "日付", "使用禁止数", "ポケモン"])
+            writer.writerow(["試合ID", "ピック順", "日付", "勝利チーム", "使用禁止ポケモン"])
             for row in response["Rows"]:
                 record = [data["ScalarValue"] for data in row["Data"]]
-                record.append(pokemon_names[record[0]])
+                record[3] = "先攻" if record[3] == "first" else "後攻"
+                record[4] = pokemon_names[record[4]]
                 writer.writerow(record)
-        s3.upload_file(
-            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_banned_pokemon_{yesterday}.csv"
-        )
-        print("aggregate_banned_pokemon.csv completed.")
+        s3.upload_file(tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_match_{yesterday}.csv")
+        print("aggregate_match.csv completed.")
