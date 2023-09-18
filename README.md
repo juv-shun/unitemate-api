@@ -1,12 +1,16 @@
 
-## API仕様書
+## 概要
 
-- [開発環境](https://s3.ap-northeast-1.amazonaws.com/juv-shun.website-hosting/unitemate-api/dev/redoc.html)
-- [本番環境](https://s3.ap-northeast-1.amazonaws.com/juv-shun.website-hosting/unitemate-api/prd/redoc.html)
+ユナメイト対戦情報のデータ基盤システム。
+looker studioにて、統計情報を公開している。
 
 ## システム構成図
 
 ![システム構成図](./docs/infra.png)
+
+## API仕様書
+
+- [API仕様書](https://s3.ap-northeast-1.amazonaws.com/juv-shun.website-hosting/unitemate-api/prd/redoc.html)
 
 ## 構築方法
 
