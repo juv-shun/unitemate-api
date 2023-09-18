@@ -76,7 +76,7 @@ functions:
       - schedule:
           name: ${self:service}-aggregation-export-time-${sls:stage}
           description: Aggregation CSV Export Batch Event for ${self:service}
-          rate: cron(0 1 * * ? *)
+          rate: cron(40 0 * * ? *)
 
 plugins:
   - serverless-prune-plugin
