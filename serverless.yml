@@ -39,6 +39,8 @@ provider:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
     USER_RESULT_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
     POKEMON_AGGREGATION_TABLE: aggregation-pokemon-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationTable
+    EXPORT_S3_BUCKET: !Ref UnitemateCSVExportBucket
+    EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
 
 package:
   individually: true
@@ -60,21 +62,16 @@ functions:
   csv_export_origin:
     name: ${self:service}-csv-export-origin-${sls:stage}
     handler: src.csv_export.handler.origin
-    environment:
-      EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
-      EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
     events:
       - schedule:
           name: ${self:service}-origin-export-time-${sls:stage}
           description: Origin CSV Export Batch Event for ${self:service}
           rate: cron(0 1 * * ? *)
-          enabled: ${param:event_bridge_schedule_enabled}
+          enabled: ${param:schedule_enabled}
   csv_export_aggregation:
     name: ${self:service}-csv-export-aggregation-${sls:stage}
     handler: src.csv_export.handler.aggregate
     environment:
-      EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
-      EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
       GOOGLE_APPLICATION_CREDENTIALS: src/csv_export/clientLibraryConfig.json
       GOOGLE_CLOUD_PROJECT: ${self:service}
     events:
@@ -82,7 +79,7 @@ functions:
           name: ${self:service}-aggregation-export-time-${sls:stage}
           description: Aggregation CSV Export Batch Event for ${self:service}
           rate: cron(40 0 * * ? *)
-          enabled: ${param:event_bridge_schedule_enabled}
+          enabled: ${param:schedule_enabled}
 
 plugins:
   - serverless-prune-plugin
@@ -114,7 +111,7 @@ resources:
         TableName: origin_user_results-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
-          MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
+          MagneticStoreRetentionPeriodInDays: ${param:life_cycle_days}
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
@@ -125,7 +122,7 @@ resources:
         TableName: aggregation-pokemon-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
-          MagneticStoreRetentionPeriodInDays: ${param:magetic_store_retention_period_in_days}
+          MagneticStoreRetentionPeriodInDays: ${param:life_cycle_days}
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
@@ -143,7 +140,7 @@ resources:
           Rules:
             - Id: ExpirationRule
               Status: Enabled
-              ExpirationInDays: 90
+              ExpirationInDays: ${param:life_cycle_days}
     UnitemateSNSTopic:
       Type: AWS::SNS::Topic
       Properties:
@@ -151,8 +148,8 @@ resources:
 
 params:
   prd:
-    magetic_store_retention_period_in_days: "90"
-    event_bridge_schedule_enabled: true
+    life_cycle_days: "90"
+    schedule_enabled: true
   dev:
-    magetic_store_retention_period_in_days: "2"
-    event_bridge_schedule_enabled: false
+    life_cycle_days: "2"
+    schedule_enabled: false

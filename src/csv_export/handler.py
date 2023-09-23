@@ -12,7 +12,7 @@ from google.cloud import storage
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
 USER_RESULT_TABLE = os.environ["USER_RESULT_TABLE"]
 POKEMON_AGGREGATION_TABLE = os.environ["POKEMON_AGGREGATION_TABLE"]
-EXPORT_BUCKET = os.environ["EXPORT_BUCKET"]
+EXPORT_S3_BUCKET = os.environ["EXPORT_S3_BUCKET"]
 EXPORT_GCS_BUCKET = os.environ["EXPORT_GCS_BUCKET"]
 client = boto3.client("timestream-query")
 
@@ -25,7 +25,7 @@ def origin(_, __):
         SELECT *
         FROM "{TIMESTREAM_DB_NAME}"."{USER_RESULT_TABLE}"
         WHERE time BETWEEN bin(now(), 1d) - 1d AND bin(now(), 1d)
-    ) TO 's3://{EXPORT_BUCKET}/origin/{yesterday.strftime('%Y-%m-%d')}/{USER_RESULT_TABLE}'
+    ) TO 's3://{EXPORT_S3_BUCKET}/origin/{yesterday.strftime('%Y-%m-%d')}/{USER_RESULT_TABLE}'
     """
     try:
         client.query(QueryString=query)
@@ -57,7 +57,7 @@ def aggregate(_, __):
             writer = csv.writer(fw)
             writer.writerow(["ポケモン", "英語名", "日付", "勝利数", "敗戦数", "ピック数", "使用禁止数", "対戦総数"])
             for row in response["Rows"]:
-                record = [data["ScalarValue"] for data in row["Data"]]
+                record = [data.get("ScalarValue") for data in row["Data"]]
                 record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
         blob = bucket.blob(f"paid/aggregate_by_pokemon/aggregate_by_pokemon_{yesterday}.csv")
@@ -77,7 +77,7 @@ def aggregate(_, __):
             writer = csv.writer(fw)
             writer.writerow(["ポケモン", "英語名", "技1", "技2", "日付", "勝利数", "敗戦数", "ピック数", "対戦総数"])
             for row in response["Rows"]:
-                record = [data["ScalarValue"] for data in row["Data"]]
+                record = [data.get("ScalarValue") for data in row["Data"]]
                 record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
 
@@ -98,7 +98,7 @@ def aggregate(_, __):
             writer = csv.writer(fw)
             writer.writerow(["試合ID", "ピック順", "日付", "勝利チーム", "使用禁止ポケモン"])
             for row in response["Rows"]:
-                record = [data["ScalarValue"] for data in row["Data"]]
+                record = [data.get("ScalarValue") for data in row["Data"]]
                 record[3] = "先攻" if record[3] == "first" else "後攻"
                 record[4] = pokemon_names[record[4]]
                 writer.writerow(record)
