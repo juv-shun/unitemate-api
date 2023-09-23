@@ -68,6 +68,7 @@ functions:
           name: ${self:service}-origin-export-time-${sls:stage}
           description: Origin CSV Export Batch Event for ${self:service}
           rate: cron(0 1 * * ? *)
+          enabled: ${param:event_bridge_schedule_enabled}
   csv_export_aggregation:
     name: ${self:service}-csv-export-aggregation-${sls:stage}
     handler: src.csv_export.handler.aggregate
@@ -81,6 +82,7 @@ functions:
           name: ${self:service}-aggregation-export-time-${sls:stage}
           description: Aggregation CSV Export Batch Event for ${self:service}
           rate: cron(40 0 * * ? *)
+          enabled: ${param:event_bridge_schedule_enabled}
 
 plugins:
   - serverless-prune-plugin
@@ -150,5 +152,7 @@ resources:
 params:
   prd:
     magetic_store_retention_period_in_days: "90"
+    event_bridge_schedule_enabled: true
   dev:
     magetic_store_retention_period_in_days: "2"
+    event_bridge_schedule_enabled: false
