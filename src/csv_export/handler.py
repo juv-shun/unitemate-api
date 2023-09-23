@@ -7,13 +7,14 @@ from datetime import date, timedelta
 from pathlib import Path
 
 import boto3
+from google.cloud import storage
 
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
 USER_RESULT_TABLE = os.environ["USER_RESULT_TABLE"]
 POKEMON_AGGREGATION_TABLE = os.environ["POKEMON_AGGREGATION_TABLE"]
 EXPORT_BUCKET = os.environ["EXPORT_BUCKET"]
+EXPORT_GCS_BUCKET = os.environ["EXPORT_GCS_BUCKET"]
 client = boto3.client("timestream-query")
-s3 = boto3.client("s3")
 
 
 def origin(_, __):
@@ -35,6 +36,8 @@ def origin(_, __):
 
 
 def aggregate(_, __):
+    gcs = storage.Client()
+    bucket = gcs.bucket(EXPORT_GCS_BUCKET)
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
 
     with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
@@ -57,9 +60,8 @@ def aggregate(_, __):
                 record = [data["ScalarValue"] for data in row["Data"]]
                 record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
-        s3.upload_file(
-            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_by_pokemon_{yesterday}.csv"
-        )
+        blob = bucket.blob(f"paid/aggregate_by_pokemon/aggregate_by_pokemon_{yesterday}.csv")
+        blob.upload_from_filename(tmpfile)
         print("aggregate_by_pokemon.csv completed.")
 
         query = f"""
@@ -79,9 +81,8 @@ def aggregate(_, __):
                 record.insert(0, pokemon_names[record[0]])
                 writer.writerow(record)
 
-        s3.upload_file(
-            tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_by_pokemon_move_{yesterday}.csv"
-        )
+        blob = bucket.blob(f"paid/aggregate_by_pokemon_move/aggregate_by_pokemon_move_{yesterday}.csv")
+        blob.upload_from_filename(tmpfile)
         print("aggregate_by_pokemon_move.csv completed.")
 
         query = f"""
@@ -101,5 +102,6 @@ def aggregate(_, __):
                 record[3] = "先攻" if record[3] == "first" else "後攻"
                 record[4] = pokemon_names[record[4]]
                 writer.writerow(record)
-        s3.upload_file(tmpfile, Bucket=EXPORT_BUCKET, Key=f"aggregation/{yesterday}/aggregate_match_{yesterday}.csv")
+        blob = bucket.blob(f"paid/aggregate_by_match/aggregate_match_{yesterday}.csv")
+        blob.upload_from_filename(tmpfile)
         print("aggregate_match.csv completed.")

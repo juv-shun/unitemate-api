@@ -62,6 +62,7 @@ functions:
     handler: src.csv_export.handler.origin
     environment:
       EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
+      EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
     events:
       - schedule:
           name: ${self:service}-origin-export-time-${sls:stage}
@@ -72,6 +73,9 @@ functions:
     handler: src.csv_export.handler.aggregate
     environment:
       EXPORT_BUCKET: !Ref UnitemateCSVExportBucket
+      EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
+      GOOGLE_APPLICATION_CREDENTIALS: src/csv_export/clientLibraryConfig.json
+      GOOGLE_CLOUD_PROJECT: ${self:service}
     events:
       - schedule:
           name: ${self:service}-aggregation-export-time-${sls:stage}

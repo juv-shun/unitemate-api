@@ -9,6 +9,7 @@ packages = [{ include = "unitemate_api" }]
 [tool.poetry.dependencies]
 python = "^3.9,<3.10"
 pydantic = "^2.3.0"
+google-cloud-storage = "^2.11.0"
 
 
 [tool.poetry.group.dev.dependencies]
