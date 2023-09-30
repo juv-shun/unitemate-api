@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from .models import MatchUserResult
 
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
-USER_RESULT_TABLE = os.environ["USER_RESULT_TABLE"]
+ORIGIN_TABLE = os.environ["ORIGIN_TABLE"]
 
 
 def build_record(name: str, value, type: str) -> Dict[str, Any]:
@@ -52,7 +52,7 @@ def user_result(event, _):
     try:
         write_client.write_records(
             DatabaseName=TIMESTREAM_DB_NAME,
-            TableName=USER_RESULT_TABLE,
+            TableName=ORIGIN_TABLE,
             CommonAttributes={},
             Records=[record],
         )

@@ -10,7 +10,7 @@ import boto3
 from google.cloud import storage
 
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
-USER_RESULT_TABLE = os.environ["USER_RESULT_TABLE"]
+ORIGIN_TABLE = os.environ["ORIGIN_TABLE"]
 AGGREGATION_RESULT_TABLE = os.environ["AGGREGATION_RESULT_TABLE"]
 EXPORT_S3_BUCKET = os.environ["EXPORT_S3_BUCKET"]
 EXPORT_GCS_BUCKET = os.environ["EXPORT_GCS_BUCKET"]
@@ -23,9 +23,9 @@ def origin(_, __):
     query = f"""
     UNLOAD (
         SELECT *
-        FROM "{TIMESTREAM_DB_NAME}"."{USER_RESULT_TABLE}"
+        FROM "{TIMESTREAM_DB_NAME}"."{ORIGIN_TABLE}"
         WHERE time BETWEEN bin(now(), 1d) - 1d AND bin(now(), 1d)
-    ) TO 's3://{EXPORT_S3_BUCKET}/origin/{yesterday.strftime('%Y-%m-%d')}/{USER_RESULT_TABLE}'
+    ) TO 's3://{EXPORT_S3_BUCKET}/origin/{yesterday.strftime('%Y-%m-%d')}/{ORIGIN_TABLE}'
     """
     try:
         client.query(QueryString=query)

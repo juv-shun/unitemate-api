@@ -37,7 +37,7 @@ provider:
             - !Join ["", [!GetAtt UnitemateCSVExportBucket.Arn, "/*"]]
   environment:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
-    USER_RESULT_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
+    ORIGIN_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
     AGGREGATION_RESULT_TABLE: aggregation-result-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationResultTable.Name
     EXPORT_S3_BUCKET: !Ref UnitemateCSVExportBucket
     EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
