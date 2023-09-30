@@ -38,7 +38,7 @@ provider:
   environment:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
     USER_RESULT_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
-    POKEMON_AGGREGATION_TABLE: aggregation-pokemon-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationTable
+    AGGREGATION_RESULT_TABLE: aggregation-result-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationResultTable.Name
     EXPORT_S3_BUCKET: !Ref UnitemateCSVExportBucket
     EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
 
@@ -115,11 +115,22 @@ resources:
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
-    UnitemateTimeStreamAggregationTable:
+    UnitemateTimeStreamProcessedOriginTable:
       Type: AWS::Timestream::Table
       Properties:
         DatabaseName: !Ref UnitemateTimeStreamDB
-        TableName: aggregation-pokemon-${sls:stage}
+        TableName: processed-origin-${sls:stage}
+        RetentionProperties:
+          MemoryStoreRetentionPeriodInHours: "1"
+          MagneticStoreRetentionPeriodInDays: ${param:life_cycle_days}
+        MagneticStoreWriteProperties:
+          EnableMagneticStoreWrites: true
+          MagneticStoreRejectedDataLocation: {}
+    UnitemateTimeStreamAggregationResultTable:
+      Type: AWS::Timestream::Table
+      Properties:
+        DatabaseName: !Ref UnitemateTimeStreamDB
+        TableName: aggregation-result-${sls:stage}
         RetentionProperties:
           MemoryStoreRetentionPeriodInHours: "1"
           MagneticStoreRetentionPeriodInDays: ${param:life_cycle_days}
