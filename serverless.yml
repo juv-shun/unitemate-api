@@ -53,7 +53,7 @@ package:
 functions:
   match_user_result:
     name: ${self:service}-user-result-${sls:stage}
-    handler: src.match_api.handler.user_result
+    handler: src.api.handler.user_result
     events:
       - http:
           path: v1/match/user_result
