@@ -18,21 +18,14 @@ client = boto3.client("timestream-query")
 
 
 def origin(_, __):
-    yesterday = date.today() - timedelta(days=1)
-
-    query = f"""
-    UNLOAD (
-        SELECT *
-        FROM "{TIMESTREAM_DB_NAME}"."{ORIGIN_TABLE}"
-        WHERE time BETWEEN bin(now(), 1d) - 1d AND bin(now(), 1d)
-    ) TO 's3://{EXPORT_S3_BUCKET}/origin/{yesterday.strftime('%Y-%m-%d')}/{ORIGIN_TABLE}'
-    """
-    try:
-        client.query(QueryString=query)
-    except Exception as e:
-        print("query = " + re.sub("\s+", " ", query))
-        raise e
-    return None
+    with open(Path(__file__).parent / "sql" / "origin_export.sql", "rt") as fr:
+        query = fr.read().format(
+            db=TIMESTREAM_DB_NAME,
+            table=ORIGIN_TABLE,
+            bucket=EXPORT_S3_BUCKET,
+            date=(date.today() - timedelta(days=1)).strftime("%Y-%m-%d"),
+        )
+    client.query(QueryString=query)
 
 
 def aggregate(_, __):
