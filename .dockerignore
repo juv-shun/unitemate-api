@@ -1,0 +1,5 @@
+node_modules
+.serverless
+.mypy_cache
+.venv
+**/tmp/**
