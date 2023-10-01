@@ -1,8 +1,11 @@
-from datetime import datetime
+from datetime import datetime as _datetime
+from datetime import timedelta, timezone
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+
+JST = timezone(timedelta(hours=+9), "JST")
 
 
 class WinnerEnum(str, Enum):
@@ -83,9 +86,16 @@ class MatchUserResult(BaseModel):
     match_id: str
     user_id: str
     winner: WinnerEnum
-    datetime: datetime
+    datetime: _datetime
     pokemon: PokemonEnum
     moves: Optional[MoveModel] = None
     is_first_pick: bool
     banned_pokemons: Optional[List[PokemonEnum]] = None
     rate: Optional[int] = None
+
+    @field_validator("datetime")
+    @classmethod
+    def validate_datetime(cls, value: _datetime) -> _datetime:
+        if value < (_datetime.now(JST) - timedelta(hours=24)):
+            raise ValueError("datetime must be in 24 hours.")
+        return value
