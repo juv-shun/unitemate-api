@@ -28,106 +28,62 @@ def origin(_, __):
 
 
 def aggregate(_, __):
-    gcs = storage.Client()
-    bucket = gcs.bucket(EXPORT_GCS_BUCKET)
-    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-
     with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
         pokemon_names = json.load(fr)
 
+    aggregations = [
+        {
+            "name": "aggregate_by_pokemon",
+            "csv_header": [
+                "ポケモン",
+                "英語名",
+                "日付",
+                "先攻ピック数",
+                "先攻ピック勝利数",
+                "後攻ピック数",
+                "後攻ピック勝利数",
+                "先攻使用禁止数",
+                "先攻使用禁止勝利数",
+                "後攻使用禁止数",
+                "後攻使用禁止勝利数",
+                "使用禁止数",
+                "対戦総数",
+            ],
+        },
+        {
+            "name": "aggregate_by_pokemon_move",
+            "csv_header": [
+                "ポケモン",
+                "英語名",
+                "技1",
+                "技2",
+                "日付",
+                "先攻ピック数",
+                "先攻ピック勝利数",
+                "後攻ピック数",
+                "後攻ピック勝利数",
+                "対戦総数",
+            ],
+        },
+    ]
+
+    bucket = storage.Client().bucket(EXPORT_GCS_BUCKET)
+    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
+
     with tempfile.TemporaryDirectory() as tmpdirname:
-        query = f"""
-        SELECT
-            pokemon,
-            date(time) AS date,
-            first_picked,
-            first_picked_win,
-            second_picked,
-            second_picked_win,
-            first_banned,
-            first_banned_win,
-            second_banned,
-            second_banned_win,
-            banned,
-            match_total
-        FROM "{TIMESTREAM_DB_NAME}"."{AGGREGATION_RESULT_TABLE}"
-        WHERE
-            time = bin(now(), 1d) - 1d
-            AND namespace = 'default'
-            AND measure_name = 'aggregate_by_pokemon'
-        ORDER BY first_picked + second_picked + banned DESC
-        """
-        response = client.query(QueryString=query)
+        for agg in aggregations:
+            with open(Path(__file__).parent / "sql" / f"{agg['name']}.sql", "rt") as fr:
+                query = fr.read().format(db=TIMESTREAM_DB_NAME, table=AGGREGATION_RESULT_TABLE)
+            response = client.query(QueryString=query)
 
-        tmpfile = os.path.join(tmpdirname, "tmp.csv")
-        with open(tmpfile, "wt") as fw:
-            writer = csv.writer(fw)
-            writer.writerow(
-                [
-                    "ポケモン",
-                    "英語名",
-                    "日付",
-                    "先攻ピック数",
-                    "先攻ピック勝利数",
-                    "後攻ピック数",
-                    "後攻ピック勝利数",
-                    "先攻使用禁止数",
-                    "先攻使用禁止勝利数",
-                    "後攻使用禁止数",
-                    "後攻使用禁止勝利数",
-                    "使用禁止数",
-                    "対戦総数",
-                ]
-            )
-            for row in response["Rows"]:
-                record = [data.get("ScalarValue") for data in row["Data"]]
-                record.insert(0, pokemon_names[record[0]])
-                writer.writerow(record)
-        blob = bucket.blob(f"default/aggregate_by_pokemon/aggregate_by_pokemon_{yesterday}.csv")
-        blob.upload_from_filename(tmpfile)
-        print(f"aggregate_by_pokemon_{yesterday}.csv completed.")
-
-        query = f"""
-        SELECT
-            pokemon,
-            move1,
-            move2,
-            date(time) AS date,
-            first_picked,
-            first_picked_win,
-            second_picked,
-            second_picked_win,
-            match_total
-        FROM "{TIMESTREAM_DB_NAME}"."{AGGREGATION_RESULT_TABLE}"
-        WHERE
-            time = bin(now(), 1d) - 1d
-            AND namespace = 'default'
-            AND measure_name = 'aggregate_by_pokemon_move'
-        ORDER BY first_picked + second_picked DESC
-        """
-        response = client.query(QueryString=query)
-
-        tmpfile = os.path.join(tmpdirname, "tmp.csv")
-        with open(tmpfile, "wt") as fw:
-            writer = csv.writer(fw)
-            writer.writerow(
-                [
-                    "ポケモン",
-                    "英語名",
-                    "技1",
-                    "技2",
-                    "日付",
-                    "先攻ピック数",
-                    "先攻ピック勝利数",
-                    "後攻ピック数",
-                    "後攻ピック勝利数",
-                    "対戦総数",
-                ]
-            )
-            for row in response["Rows"]:
-                record = [data.get("ScalarValue") for data in row["Data"]]
-                record.insert(0, pokemon_names[record[0]])
-                writer.writerow(record)
-        blob = bucket.blob(f"default/aggregate_by_pokemon_move/aggregate_by_pokemon_move_{yesterday}.csv")
-        blob.upload_from_filename(tmpfile)
-        print(f"aggregate_by_pokemon_move_{yesterday}.csv completed.")
+            tmpfile = os.path.join(tmpdirname, "tmp.csv")
+            with open(tmpfile, "wt") as fw:
+                writer = csv.writer(fw)
+                writer.writerow(agg["csv_header"])
+                for row in response["Rows"]:
+                    record = [data.get("ScalarValue") for data in row["Data"]]
+                    record.insert(0, pokemon_names[record[0]])
+                    writer.writerow(record)
+            blob = bucket.blob(f"default/{agg['name']}/{agg['name']}_{yesterday}.csv")
+            blob.upload_from_filename(tmpfile)
+            print(f"{agg['name']}_{yesterday}.csv completed.")
