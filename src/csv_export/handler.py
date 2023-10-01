@@ -1,7 +1,6 @@
 import csv
 import json
 import os
-import re
 import tempfile
 from datetime import date, timedelta
 from pathlib import Path
