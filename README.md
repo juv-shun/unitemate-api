@@ -21,6 +21,9 @@ looker studioにて、統計情報を公開している。
 - Serverless Frameworkで使用するデプロイメントバケットを用意し、バケット名をパラメータストアに保存。
 - ドメインを取得し、Route53のホストを作成し、ドメイン名をパラメータストアに保存。
 - 取得したドメインに対してCertificate Managerで証明書を発行し、ARNをパラメータストアに保存。
+- TimeStreamのスケジュールクエリ
+- Looker StudioのデータソースとなるGCSバケット
+- Looker Studio設定
 
 ### カスタムドメイン作成
 
