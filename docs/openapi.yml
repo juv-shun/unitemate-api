@@ -25,6 +25,10 @@ paths:
             schema:
               type: object
               properties:
+                namespace:
+                  type: string
+                  description: 名前空間
+                  default: default
                 match_id:
                   type: string
                   description: 試合ID
