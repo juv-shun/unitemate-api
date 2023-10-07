@@ -17,7 +17,7 @@ client = boto3.client("timestream-query")
 
 
 def origin(_, __):
-    with open(Path(__file__).parent / "sql" / "origin_export.sql", "rt") as fr:
+    with open(Path(__file__).parent / "sql" / "origin.sql", "rt") as fr:
         query = fr.read().format(
             db=TIMESTREAM_DB_NAME,
             table=ORIGIN_TABLE,
