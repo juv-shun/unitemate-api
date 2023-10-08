@@ -17,6 +17,7 @@ black = "^23.7.0"
 mypy = "^1.5.1"
 boto3-stubs = "^1.28.40"
 flake8 = "^6.1.0"
+types-google-cloud-ndb = "^2.2.0.1"
 
 [build-system]
 requires = ["poetry-core"]
