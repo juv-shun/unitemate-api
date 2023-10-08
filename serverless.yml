@@ -54,6 +54,7 @@ functions:
   match_user_result:
     name: ${self:service}-user-result-${sls:stage}
     handler: src.api.handler.user_result
+    description: API Gatewayからリクエストを受信してTimeStream DBに格納する関数
     events:
       - http:
           path: v1/match/user_result
@@ -62,6 +63,7 @@ functions:
   csv_export_origin:
     name: ${self:service}-csv-export-origin-${sls:stage}
     handler: src.csv_export.handler.origin
+    description: TimeStream DBに格納されている元データをS3にCSVバックアップする関数
     events:
       - schedule:
           name: ${self:service}-origin-export-time-${sls:stage}
@@ -71,6 +73,7 @@ functions:
   csv_export_aggregation:
     name: ${self:service}-csv-export-aggregation-${sls:stage}
     handler: src.csv_export.handler.aggregate
+    description: スケジュールクエリで集計された結果をGCSにCSVエクスポートする関数
     environment:
       GOOGLE_APPLICATION_CREDENTIALS: src/csv_export/clientLibraryConfig.json
       GOOGLE_CLOUD_PROJECT: ${self:service}

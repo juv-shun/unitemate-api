@@ -16,12 +16,16 @@ def build_record(name: str, value, type: str) -> Dict[str, Any]:
 
 
 def user_result(event, _):
+    """AWS API Gateway経由で受信したリクエスト情報をもとに、Timestream DBにデータを格納する。"""
+
+    # バリデーションチェック
     try:
         model = MatchUserResult(**json.loads(event["body"]))
     except ValidationError as e:
         print("ERROR: " + json.dumps(e.json()))
         return {"statusCode": 422, "body": e.json()}
 
+    # Timestream DBに格納するためのレコード生成
     write_client = boto3.Session().client("timestream-write")
     record = {
         "Dimensions": [
@@ -47,6 +51,7 @@ def user_result(event, _):
     if model.rate:
         record["MeasureValues"].append(build_record("rate", str(model.rate), "BIGINT"))
 
+    # Timestream DBに格納
     try:
         write_client.write_records(
             DatabaseName=TIMESTREAM_DB_NAME,

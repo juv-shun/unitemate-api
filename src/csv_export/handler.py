@@ -17,6 +17,7 @@ client = boto3.client("timestream-query")
 
 
 def origin(_, __):
+    """APIで受信した生データをS3にバックアップする。"""
     with open(Path(__file__).parent / "sql" / "origin.sql", "rt") as fr:
         query = fr.read().format(
             db=TIMESTREAM_DB_NAME,
@@ -28,6 +29,10 @@ def origin(_, __):
 
 
 def aggregate(_, __):
+    """スケジュールクエリでテーブルに出力された集計結果をCSVファイルに変換してGCSにエクスポートする。"""
+
+    # ポケモン英語名 -> 日本語名に変換するための辞書情報取得
+    # FIXME APIで最初から日本語名で受信するように仕様変更したい。
     with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
         pokemon_names = json.load(fr)
 
