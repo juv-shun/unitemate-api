@@ -36,6 +36,15 @@ def aggregate(_, __):
     with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
         pokemon_names = json.load(fr)
 
+    # namespaceの種類を取得
+    query = f"""
+    SELECT DISTINCT namespace
+    FROM "{TIMESTREAM_DB_NAME}"."{AGGREGATION_RESULT_TABLE}"
+    WHERE time = bin(now(), 1d) - 1d
+    """
+    response = client.query(QueryString=query)
+    namespaces = [row["Data"][0]["ScalarValue"] for row in response["Rows"]]
+
     aggregations = [
         {
             "name": "aggregate_by_pokemon",
@@ -76,19 +85,24 @@ def aggregate(_, __):
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
 
     with tempfile.TemporaryDirectory() as tmpdirname:
-        for agg in aggregations:
-            with open(Path(__file__).parent / "sql" / f"{agg['name']}.sql", "rt") as fr:
-                query = fr.read().format(db=TIMESTREAM_DB_NAME, table=AGGREGATION_RESULT_TABLE)
-            response = client.query(QueryString=query)
+        for namespace in namespaces:
+            for agg in aggregations:
+                with open(Path(__file__).parent / "sql" / f"{agg['name']}.sql", "rt") as fr:
+                    query = fr.read().format(
+                        db=TIMESTREAM_DB_NAME,
+                        table=AGGREGATION_RESULT_TABLE,
+                        namespace=namespace,
+                    )
+                response = client.query(QueryString=query)
 
-            tmpfile = os.path.join(tmpdirname, "tmp.csv")
-            with open(tmpfile, "wt") as fw:
-                writer = csv.writer(fw)
-                writer.writerow(agg["csv_header"])
-                for row in response["Rows"]:
-                    record = [data.get("ScalarValue") for data in row["Data"]]
-                    record.insert(0, pokemon_names[record[0]])
-                    writer.writerow(record)
-            blob = bucket.blob(f"default/{agg['name']}/{agg['name']}_{yesterday}.csv")
-            blob.upload_from_filename(tmpfile)
-            print(f"{agg['name']}_{yesterday}.csv completed.")
+                tmpfile = os.path.join(tmpdirname, "tmp.csv")
+                with open(tmpfile, "wt") as fw:
+                    writer = csv.writer(fw)
+                    writer.writerow(agg["csv_header"])
+                    for row in response["Rows"]:
+                        record = [data.get("ScalarValue") for data in row["Data"]]
+                        record.insert(0, pokemon_names[record[0]])
+                        writer.writerow(record)
+                blob = bucket.blob(f"{namespace}/{agg['name']}/{agg['name']}_{yesterday}.csv")
+                blob.upload_from_filename(tmpfile)
+                print(f"{agg['name']}_{yesterday}.csv completed.")
