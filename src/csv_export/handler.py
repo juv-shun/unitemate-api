@@ -100,6 +100,7 @@ def aggregate(_, __):
     with tempfile.TemporaryDirectory() as tmpdirname:
         for namespace in namespaces:
             for agg in aggregations:
+                # TimeStreamからレコード取得
                 with open(Path(__file__).parent / "sql" / f"{agg['name']}.sql", "rt") as fr:
                     query = fr.read().format(
                         db=TIMESTREAM_DB_NAME,
@@ -108,6 +109,7 @@ def aggregate(_, __):
                     )
                 response = client.query(QueryString=query)
 
+                # CSVファイル作成
                 tmpfile = os.path.join(tmpdirname, "tmp.csv")
                 with open(tmpfile, "wt") as fw:
                     writer = csv.writer(fw)
@@ -118,6 +120,8 @@ def aggregate(_, __):
                         if agg["name"] == "aggregate_ally_enemy_pokemon":
                             record.insert(2, pokemon_names[record[2]])
                         writer.writerow(record)
+
+                # GCSにアップロード
                 blob = bucket.blob(f"{namespace}/{agg['name']}/{agg['name']}_{yesterday}.csv")
                 blob.upload_from_filename(tmpfile)
                 print(f"{agg['name']}_{yesterday}.csv completed.")
