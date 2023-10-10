@@ -17,6 +17,10 @@ WITH yesterday_table AS (
     SELECT match_id, MIN(time) AS time
     FROM yesterday_table
     GROUP BY match_id
+), rate_table AS (
+    SELECT match_id, MIN(rate) AS rate
+    FROM yesterday_table
+    GROUP BY match_id
 ), banned_table AS (
     SELECT match_id, is_first_pick, max_by(banned_pokemon, banned_cnt) AS banned_pokemon
     FROM (
@@ -34,9 +38,11 @@ SELECT
     'match_result' AS measure_name,
     winner_table.winner,
     first_banned_pokemon0,
-    second_banned_pokemon0
+    second_banned_pokemon0,
+    rate_table.rate
 FROM winner_table
 JOIN time_table ON winner_table.match_id = time_table.match_id
+JOIN rate_table ON winner_table.match_id = rate_table.match_id
 LEFT JOIN (
     SELECT match_id, banned_pokemon AS first_banned_pokemon0
     FROM banned_table
