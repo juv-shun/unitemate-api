@@ -34,11 +34,6 @@ def aggregate(event, __):
     now = datetime.fromisoformat(event.get("time").replace("Z", "+00:00")) if event.get("time") else datetime.now()
     yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    # ポケモン英語名 -> 日本語名に変換するための辞書情報取得
-    # FIXME APIで最初から日本語名で受信するように仕様変更したい。
-    with open(Path(__file__).with_name("pokemon_names.json"), "rt") as fr:
-        pokemon_names = json.load(fr)
-
     # namespaceの種類を取得
     query = f"""
     SELECT DISTINCT namespace
@@ -73,9 +68,6 @@ def aggregate(event, __):
                     writer.writerow(agg["csv_header"])
                     for row in response["Rows"]:
                         record = [data.get("ScalarValue") for data in row["Data"]]
-                        record.insert(0, pokemon_names[record[0]])
-                        if agg["name"] == "aggregate_by_pokemon_combination":
-                            record.insert(2, pokemon_names[record[2]])
                         writer.writerow(record)
 
                 # GCSにアップロード
