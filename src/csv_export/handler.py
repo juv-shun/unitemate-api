@@ -45,54 +45,9 @@ def aggregate(_, __):
     response = client.query(QueryString=query)
     namespaces = [row["Data"][0]["ScalarValue"] for row in response["Rows"]]
 
-    aggregations = [
-        {
-            "name": "aggregate_by_pokemon",
-            "csv_header": [
-                "ポケモン",
-                "英語名",
-                "日付",
-                "先攻ピック数",
-                "先攻ピック勝利数",
-                "後攻ピック数",
-                "後攻ピック勝利数",
-                "先攻使用禁止数",
-                "先攻使用禁止勝利数",
-                "後攻使用禁止数",
-                "後攻使用禁止勝利数",
-                "使用禁止数",
-                "対戦総数",
-            ],
-        },
-        {
-            "name": "aggregate_by_pokemon_move",
-            "csv_header": [
-                "ポケモン",
-                "英語名",
-                "技1",
-                "技2",
-                "日付",
-                "先攻ピック数",
-                "先攻ピック勝利数",
-                "後攻ピック数",
-                "後攻ピック勝利数",
-                "対戦総数",
-            ],
-        },
-        {
-            "name": "aggregate_ally_enemy_pokemon",
-            "csv_header": [
-                "ポケモン",
-                "英語名",
-                "対象ポケモン",
-                "対象ポケモン英語名",
-                "チーム",
-                "試合結果",
-                "日付",
-                "試合数",
-            ],
-        },
-    ]
+    # 出力ファイルの設定を読み込む
+    with open(Path(__file__).with_name("aggregation_patterns.json"), "rt") as fr:
+        aggregations = json.load(fr)
 
     bucket = storage.Client().bucket(EXPORT_GCS_BUCKET)
     yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
