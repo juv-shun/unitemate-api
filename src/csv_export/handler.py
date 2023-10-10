@@ -79,6 +79,19 @@ def aggregate(_, __):
                 "対戦総数",
             ],
         },
+        {
+            "name": "aggregate_ally_enemy_pokemon",
+            "csv_header": [
+                "ポケモン",
+                "英語名",
+                "対象ポケモン",
+                "対象ポケモン英語名",
+                "チーム",
+                "試合結果",
+                "日付",
+                "試合数",
+            ],
+        },
     ]
 
     bucket = storage.Client().bucket(EXPORT_GCS_BUCKET)
@@ -102,6 +115,8 @@ def aggregate(_, __):
                     for row in response["Rows"]:
                         record = [data.get("ScalarValue") for data in row["Data"]]
                         record.insert(0, pokemon_names[record[0]])
+                        if agg["name"] == "aggregate_ally_enemy_pokemon":
+                            record.insert(2, pokemon_names[record[2]])
                         writer.writerow(record)
                 blob = bucket.blob(f"{namespace}/{agg['name']}/{agg['name']}_{yesterday}.csv")
                 blob.upload_from_filename(tmpfile)
