@@ -71,6 +71,6 @@ def aggregate(event, __):
                         writer.writerow(record)
 
                 # GCSにアップロード
-                blob = bucket.blob(f"{namespace}/{agg['name']}/{agg['name']}_{yesterday}.csv")
+                blob = bucket.blob(f"{namespace}/{agg['name']}/{yesterday}.csv")
                 blob.upload_from_filename(tmpfile)
                 print(f"{agg['name']}_{yesterday}.csv for {yesterday} completed.")
