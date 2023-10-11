@@ -2,7 +2,7 @@
   {
     "name": "aggregate_by_pokemon",
     "csv_header": [
-      "ポケモン",
+      "ポケモン名",
       "日付",
       "先攻ピック数",
       "先攻ピック勝利数",
@@ -19,7 +19,7 @@
   {
     "name": "aggregate_by_pokemon_move",
     "csv_header": [
-      "ポケモン",
+      "ポケモン名",
       "技1",
       "技2",
       "日付",
@@ -33,8 +33,8 @@
   {
     "name": "aggregate_by_pokemon_combination",
     "csv_header": [
-      "ポケモン",
-      "対象ポケモン",
+      "ポケモン名",
+      "対象ポケモン名",
       "日付",
       "味方時勝利数",
       "味方試合数",
