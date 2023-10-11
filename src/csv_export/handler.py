@@ -72,7 +72,7 @@ def aggregate(_, __):
                     for row in response["Rows"]:
                         record = [data.get("ScalarValue") for data in row["Data"]]
                         record.insert(0, pokemon_names[record[0]])
-                        if agg["name"] == "aggregate_ally_enemy_pokemon":
+                        if agg["name"] == "aggregate_by_pokemon_combination":
                             record.insert(2, pokemon_names[record[2]])
                         writer.writerow(record)
 

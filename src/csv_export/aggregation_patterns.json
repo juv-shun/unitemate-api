@@ -33,16 +33,17 @@
     ]
   },
   {
-    "name": "aggregate_ally_enemy_pokemon",
+    "name": "aggregate_by_pokemon_combination",
     "csv_header": [
       "ポケモン",
       "英語名",
       "対象ポケモン",
       "対象ポケモン英語名",
-      "チーム",
-      "試合結果",
       "日付",
-      "試合数"
+      "味方時勝利数",
+      "味方試合数",
+      "相手時勝利数",
+      "相手試合数"
     ]
   }
 ]
