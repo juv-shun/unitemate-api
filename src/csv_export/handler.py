@@ -73,4 +73,4 @@ def aggregate(event, __):
                 # GCSにアップロード
                 blob = bucket.blob(f"{namespace}/{agg['name']}/{yesterday}.csv")
                 blob.upload_from_filename(tmpfile)
-                print(f"{agg['name']}_{yesterday}.csv for {yesterday} completed.")
+                print(f"{agg['name']} file for {yesterday} exported.")
