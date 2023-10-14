@@ -13,7 +13,7 @@ SELECT
     match_total
 FROM "{db}"."{table}"
 WHERE
-    time = bin(now(), 1d) - 1d
+    time = '{yesterday}'
     AND namespace = '{namespace}'
     AND measure_name = 'aggregate_by_pokemon'
 ORDER BY first_picked + second_picked + banned DESC

@@ -2,7 +2,7 @@ import csv
 import json
 import os
 import tempfile
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import boto3
@@ -16,20 +16,23 @@ EXPORT_GCS_BUCKET = os.environ["EXPORT_GCS_BUCKET"]
 client = boto3.client("timestream-query")
 
 
-def origin(_, __):
+def origin(event, __):
     """APIで受信した生データをS3にバックアップする。"""
+    now = datetime.fromisoformat(event.get("time").replace("Z", "+00:00")) if event.get("time") else datetime.now()
     with open(Path(__file__).parent / "sql" / "origin.sql", "rt") as fr:
         query = fr.read().format(
             db=TIMESTREAM_DB_NAME,
             table=ORIGIN_TABLE,
             bucket=EXPORT_S3_BUCKET,
-            date=(date.today() - timedelta(days=1)).strftime("%Y-%m-%d"),
+            yesterday=(now - timedelta(days=1)).strftime("%Y-%m-%d"),
         )
     client.query(QueryString=query)
 
 
-def aggregate(_, __):
+def aggregate(event, __):
     """スケジュールクエリでテーブルに出力された集計結果をCSVファイルに変換してGCSにエクスポートする。"""
+    now = datetime.fromisoformat(event.get("time").replace("Z", "+00:00")) if event.get("time") else datetime.now()
+    yesterday = (now - timedelta(days=1)).strftime("%Y-%m-%d")
 
     # ポケモン英語名 -> 日本語名に変換するための辞書情報取得
     # FIXME APIで最初から日本語名で受信するように仕様変更したい。
@@ -40,7 +43,7 @@ def aggregate(_, __):
     query = f"""
     SELECT DISTINCT namespace
     FROM "{TIMESTREAM_DB_NAME}"."{AGGREGATION_RESULT_TABLE}"
-    WHERE time = bin(now(), 1d) - 1d
+    WHERE time = '{yesterday}'
     """
     response = client.query(QueryString=query)
     namespaces = [row["Data"][0]["ScalarValue"] for row in response["Rows"]]
@@ -50,8 +53,6 @@ def aggregate(_, __):
         aggregations = json.load(fr)
 
     bucket = storage.Client().bucket(EXPORT_GCS_BUCKET)
-    yesterday = (date.today() - timedelta(days=1)).strftime("%Y-%m-%d")
-
     with tempfile.TemporaryDirectory() as tmpdirname:
         for namespace in namespaces:
             for agg in aggregations:
@@ -61,6 +62,7 @@ def aggregate(_, __):
                         db=TIMESTREAM_DB_NAME,
                         table=AGGREGATION_RESULT_TABLE,
                         namespace=namespace,
+                        yesterday=yesterday,
                     )
                 response = client.query(QueryString=query)
 
@@ -79,4 +81,4 @@ def aggregate(_, __):
                 # GCSにアップロード
                 blob = bucket.blob(f"{namespace}/{agg['name']}/{agg['name']}_{yesterday}.csv")
                 blob.upload_from_filename(tmpfile)
-                print(f"{agg['name']}_{yesterday}.csv completed.")
+                print(f"{agg['name']}_{yesterday}.csv for {yesterday} completed.")
