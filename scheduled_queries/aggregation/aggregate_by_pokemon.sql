@@ -24,10 +24,7 @@ SELECT
     COALESCE(second_banned, 0) AS second_banned,
     COALESCE(second_banned_win, 0) AS second_banned_win,
     COALESCE(banned, 0) AS banned,
-    (
-        SELECT COUNT(DISTINCT match_id)
-        FROM match_result
-    ) AS match_total
+    COALESCE(match_total, 0) AS match_total
 FROM (
     SELECT DISTINCT namespace, pokemon
     FROM user_result
@@ -98,3 +95,9 @@ LEFT JOIN (
     GROUP BY namespace, banned_pokemon
 ) AS banned_table
 ON base.namespace = banned_table.namespace AND base.pokemon = banned_table.pokemon
+LEFT JOIN (
+    SELECT namespace, COUNT(DISTINCT match_id) as match_total
+    FROM match_result
+    GROUP BY namespace
+) AS total
+ON base.namespace = total.namespace

@@ -21,10 +21,7 @@ SELECT
     COALESCE(second_picked, 0) AS second_picked,
     COALESCE(first_picked_win, 0) AS first_picked_win,
     COALESCE(second_picked_win, 0) AS second_picked_win,
-    (
-        SELECT COUNT(DISTINCT match_id)
-        FROM match_result
-    ) AS match_total
+    COALESCE(match_total, 0) AS match_total
 FROM (
     SELECT DISTINCT namespace, pokemon, move1, move2
     FROM user_result
@@ -61,3 +58,9 @@ LEFT JOIN (
 ) AS second_picked_win_table
 ON base.namespace = second_picked_win_table.namespace AND base.pokemon = second_picked_win_table.pokemon
     AND base.move1 = second_picked_win_table.move1 AND base.move2 = second_picked_win_table.move2
+LEFT JOIN (
+    SELECT namespace, COUNT(DISTINCT match_id) as match_total
+    FROM match_result
+    GROUP BY namespace
+) AS total
+ON base.namespace = total.namespace
