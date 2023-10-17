@@ -49,7 +49,7 @@ def user_result(event, _):
         for i, pokemon in enumerate(model.banned_pokemons):
             record["MeasureValues"].append(build_record(f"banned_pokemon_{i}", pokemon, "VARCHAR"))
     if model.rate:
-        record["MeasureValues"].append(build_record("rate", str(model.rate), "BIGINT"))
+        record["MeasureValues"].append(build_record("rate", str(int(model.rate)), "BIGINT"))
 
     # Timestream DBに格納
     try:

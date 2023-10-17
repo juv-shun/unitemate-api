@@ -91,7 +91,7 @@ class MatchUserResult(BaseModel):
     moves: Optional[MoveModel] = None
     is_first_pick: bool
     banned_pokemons: Optional[List[PokemonEnum]] = None
-    rate: Optional[int] = None
+    rate: Optional[float] = None
 
     @field_validator("datetime")
     @classmethod
