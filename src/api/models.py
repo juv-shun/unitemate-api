@@ -51,6 +51,7 @@ class PokemonEnum(str, Enum):
     lucario = "lucario"
     machamp = "machamp"
     mamoswine = "mamoswine"
+    meowscarada = "meowscarada"
     mew = "mew"
     mewtwo_x = "mewtwo_x"
     mewtwo_y = "mewtwo_y"
