@@ -78,6 +78,7 @@ class PokemonEnum(str, Enum):
     zacian = "zacian"
     zeraora = "zeraora"
     zoroark = "zoroark"
+    empty = "empty"
 
 
 class MatchUserResult(BaseModel):

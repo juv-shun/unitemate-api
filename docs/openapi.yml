@@ -155,5 +155,6 @@ components:
         - zacian
         - zeraora
         - zoroark
+        - empty
       example: pikachu
       description: 使用ポケモン名
