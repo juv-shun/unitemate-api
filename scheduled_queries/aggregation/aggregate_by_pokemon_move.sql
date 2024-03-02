@@ -4,7 +4,7 @@ WITH user_result AS (
     WHERE time BETWEEN bin(@scheduled_runtime, 1d) - 1d AND bin(@scheduled_runtime, 1d)
         AND measure_name = 'user_result'
 ), match_result AS (
-    SELECT namespace, match_id, time, winner, first_banned_pokemon0, second_banned_pokemon0
+    SELECT namespace, match_id, time, winner
     FROM "unitemate-api-prd"."processed-origin-prd"
     WHERE time BETWEEN bin(@scheduled_runtime, 1d) - 1d AND bin(@scheduled_runtime, 1d)
         AND measure_name = 'match_result'

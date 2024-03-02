@@ -1,13 +1,34 @@
 WITH user_result AS (
-    SELECT namespace, match_id, user_id, time, pick_order, result, pokemon, move1, move2, rate
+    SELECT namespace, match_id, user_id, time, pick_order, result, pokemon, move1, move2
     FROM "unitemate-api-prd"."processed-origin-prd"
     WHERE time BETWEEN bin(@scheduled_runtime, 1d) - 1d AND bin(@scheduled_runtime, 1d)
         AND measure_name = 'user_result'
 ), match_result AS (
-    SELECT namespace, match_id, time, winner, first_banned_pokemon0, second_banned_pokemon0
+    SELECT namespace, match_id, time, winner
     FROM "unitemate-api-prd"."processed-origin-prd"
     WHERE time BETWEEN bin(@scheduled_runtime, 1d) - 1d AND bin(@scheduled_runtime, 1d)
         AND measure_name = 'match_result'
+), ban_result AS (
+    SELECT namespace, match_id, time, pick_order, banned_pokemon
+    FROM "unitemate-api-prd"."processed-origin-prd"
+    WHERE time BETWEEN bin(@scheduled_runtime, 1d) - 1d AND bin(@scheduled_runtime, 1d)
+        AND measure_name = 'ban_result'
+), match_ban AS (
+    SELECT
+        ban_result.namespace,
+        ban_result.match_id,
+        ban_result.time,
+        ban_result.pick_order,
+        CASE
+            WHEN ban_result.pick_order = match_result.winner
+            THEN 'win' ELSE 'lose'
+        END AS result,
+        banned_pokemon
+    FROM ban_result
+    JOIN match_result ON
+        ban_result.namespace = match_result.namespace
+        AND ban_result.match_id = match_result.match_id
+        AND ban_result.time = match_result.time
 )
 
 SELECT
@@ -58,40 +79,36 @@ LEFT JOIN (
 ) AS second_picked_win_table
 ON base.namespace = second_picked_win_table.namespace AND base.pokemon = second_picked_win_table.pokemon
 LEFT JOIN (
-    SELECT namespace, first_banned_pokemon0 AS pokemon, COUNT(DISTINCT match_id) AS first_banned
-    FROM match_result
-    GROUP BY namespace, first_banned_pokemon0
+    SELECT namespace, banned_pokemon AS pokemon, COUNT(DISTINCT match_id) AS first_banned
+    FROM match_ban
+    WHERE pick_order = 'first'
+    GROUP BY namespace, banned_pokemon
 ) AS first_banned_table
 ON base.namespace = first_banned_table.namespace AND base.pokemon = first_banned_table.pokemon
 LEFT JOIN (
-    SELECT namespace, second_banned_pokemon0 AS pokemon, COUNT(DISTINCT match_id) AS second_banned
-    FROM match_result
-    GROUP BY namespace, second_banned_pokemon0
+    SELECT namespace, banned_pokemon AS pokemon, COUNT(DISTINCT match_id) AS second_banned
+    FROM match_ban
+    WHERE pick_order = 'second'
+    GROUP BY namespace, banned_pokemon
 ) AS second_banned_table
 ON base.namespace = second_banned_table.namespace AND base.pokemon = second_banned_table.pokemon
 LEFT JOIN (
-    SELECT namespace, first_banned_pokemon0 AS pokemon, COUNT(DISTINCT match_id) AS first_banned_win
-    FROM match_result
-    WHERE winner = 'first'
-    GROUP BY namespace, first_banned_pokemon0
+    SELECT namespace, banned_pokemon AS pokemon, COUNT(DISTINCT match_id) AS first_banned_win
+    FROM match_ban
+    WHERE pick_order = 'first' AND result = 'win'
+    GROUP BY namespace, banned_pokemon
 ) AS first_banned_win_table
 ON base.namespace = first_banned_win_table.namespace AND base.pokemon = first_banned_win_table.pokemon
 LEFT JOIN (
-    SELECT namespace, second_banned_pokemon0 AS pokemon, COUNT(DISTINCT match_id) AS second_banned_win
-    FROM match_result
-    WHERE winner = 'second'
-    GROUP BY namespace, second_banned_pokemon0
+    SELECT namespace, banned_pokemon AS pokemon, COUNT(DISTINCT match_id) AS second_banned_win
+    FROM match_ban
+    WHERE pick_order = 'second' AND result = 'win'
+    GROUP BY namespace, banned_pokemon
 ) AS second_banned_win_table
 ON base.namespace = second_banned_win_table.namespace AND base.pokemon = second_banned_win_table.pokemon
 LEFT JOIN (
     SELECT namespace, banned_pokemon AS pokemon, COUNT(DISTINCT match_id) AS banned
-    FROM (
-        SELECT namespace, match_id, first_banned_pokemon0 AS banned_pokemon
-        FROM match_result
-        UNION ALL
-        SELECT namespace, match_id, second_banned_pokemon0 AS banned_pokemon
-        FROM match_result
-    )
+    FROM match_ban
     GROUP BY namespace, banned_pokemon
 ) AS banned_table
 ON base.namespace = banned_table.namespace AND base.pokemon = banned_table.pokemon
