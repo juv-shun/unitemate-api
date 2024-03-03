@@ -1,7 +1,7 @@
 WITH yesterday_table AS (
     SELECT *
     FROM "unitemate-api-prd"."origin_user_results-prd"
-    WHERE time BETWEEN @scheduled_runtime - 5h AND @scheduled_runtime - 1h
+    WHERE time > @scheduled_runtime - interval '30' minute
         AND namespace IN ('default', 'default_free')
 ), winner_table AS (
     SELECT namespace, match_id, max_by(winner, cnt) AS winner
