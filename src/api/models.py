@@ -14,73 +14,6 @@ class WinnerEnum(str, Enum):
     invalid = "invalid"
 
 
-class PokemonEnum(str, Enum):
-    absol = "absol"
-    aegislash = "aegislash"
-    azumarill = "azumarill"
-    blastoise = "blastoise"
-    blaziken = "blaziken"
-    blissey = "blissey"
-    buzzwole = "buzzwole"
-    chandelure = "chandelure"
-    charizard = "charizard"
-    cinderace = "cinderace"
-    clefable = "clefable"
-    comfey = "comfey"
-    cramorant = "cramorant"
-    crustle = "crustle"
-    decidueye = "decidueye"
-    delphox = "delphox"
-    dodrio = "dodrio"
-    dragapult = "dragapult"
-    dragonite = "dragonite"
-    duraludon = "duraludon"
-    eldegoss = "eldegoss"
-    espeon = "espeon"
-    garchomp = "garchomp"
-    gardevoir = "gardevoir"
-    gengar = "gengar"
-    glaceon = "glaceon"
-    goodra = "goodra"
-    greedent = "greedent"
-    greninja = "greninja"
-    gyarados = "gyarados"
-    hoopa = "hoopa"
-    inteleon = "inteleon"
-    lapras = "lapras"
-    leafeon = "leafeon"
-    lucario = "lucario"
-    machamp = "machamp"
-    mamoswine = "mamoswine"
-    meowscarada = "meowscarada"
-    metagross = "metagross"
-    mew = "mew"
-    mewtwo_x = "mewtwo_x"
-    mewtwo_y = "mewtwo_y"
-    mimikyu = "mimikyu"
-    mr_mime = "mr_mime"
-    ninetales = "ninetales"
-    pikachu = "pikachu"
-    sableye = "sableye"
-    scizor = "scizor"
-    scyther = "scyther"
-    slowbro = "slowbro"
-    snorlax = "snorlax"
-    sylveon = "sylveon"
-    talonflame = "talonflame"
-    trevenant = "trevenant"
-    tsareena = "tsareena"
-    tyranitar = "tyranitar"
-    umbreon = "umbreon"
-    urshifu = "urshifu"
-    venusaur = "venusaur"
-    wigglytuff = "wigglytuff"
-    zacian = "zacian"
-    zeraora = "zeraora"
-    zoroark = "zoroark"
-    empty = "empty"
-
-
 class MatchUserResult(BaseModel):
     class MoveModel(BaseModel):
         move1: str
@@ -91,10 +24,10 @@ class MatchUserResult(BaseModel):
     user_id: str
     winner: WinnerEnum
     datetime: _datetime
-    pokemon: PokemonEnum
+    pokemon: str
     moves: Optional[MoveModel] = None
     is_first_pick: bool
-    banned_pokemons: Optional[List[PokemonEnum]] = None
+    banned_pokemons: Optional[List[str]] = None
     rate: Optional[float] = None
 
     @field_validator("datetime")

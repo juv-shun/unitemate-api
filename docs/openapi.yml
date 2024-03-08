@@ -45,7 +45,9 @@ paths:
                   example: "2023-09-01T12:10:00+09:00"
                   description: 対戦日時 (UTCフォーマット)
                 pokemon:
-                  $ref: "#/components/schemas/PokemonEnum"
+                  type: string
+                  description: ポケモン名
+                  example: pikachu
                 moves:
                   type: object
                   description: 技の選択
@@ -62,7 +64,9 @@ paths:
                 banned_pokemons:
                   type: array
                   items:
-                    $ref: "#/components/schemas/PokemonEnum"
+                    type: string
+                    description: ポケモン名
+                    example: pikachu
                 rate:
                   type: number
                   format: float
@@ -88,73 +92,3 @@ components:
       type: apiKey
       in: header
       name: X-API-KEY
-  schemas:
-    PokemonEnum:
-      type: string
-      enum:
-        - absol
-        - aegislash
-        - azumarill
-        - blastoise
-        - blaziken
-        - blissey
-        - buzzwole
-        - chandelure
-        - charizard
-        - cinderace
-        - clefable
-        - comfey
-        - cramorant
-        - crustle
-        - decidueye
-        - delphox
-        - dodrio
-        - dragapult
-        - dragonite
-        - duraludon
-        - eldegoss
-        - espeon
-        - garchomp
-        - gardevoir
-        - gengar
-        - glaceon
-        - goodra
-        - greedent
-        - greninja
-        - gyarados
-        - hoopa
-        - inteleon
-        - lapras
-        - leafeon
-        - lucario
-        - machamp
-        - mamoswine
-        - meowscarada
-        - metagross
-        - mew
-        - mewtwo_x
-        - mewtwo_y
-        - mimikyu
-        - mr_mime
-        - ninetales
-        - pikachu
-        - sableye
-        - scizor
-        - scyther
-        - slowbro
-        - snorlax
-        - sylveon
-        - talonflame
-        - trevenant
-        - tsareena
-        - tyranitar
-        - umbreon
-        - urshifu
-        - venusaur
-        - wigglytuff
-        - zacian
-        - zeraora
-        - zoroark
-        - empty
-      example: pikachu
-      description: 使用ポケモン名
