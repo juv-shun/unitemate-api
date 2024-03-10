@@ -11,22 +11,8 @@ from google.cloud import storage
 TIMESTREAM_DB_NAME = os.environ["TIMESTREAM_DB_NAME"]
 ORIGIN_TABLE = os.environ["ORIGIN_TABLE"]
 AGGREGATION_RESULT_TABLE = os.environ["AGGREGATION_RESULT_TABLE"]
-EXPORT_S3_BUCKET = os.environ["EXPORT_S3_BUCKET"]
 EXPORT_GCS_BUCKET = os.environ["EXPORT_GCS_BUCKET"]
 client = boto3.client("timestream-query")
-
-
-def origin(event, __):
-    """APIで受信した生データをS3にバックアップする。"""
-    now = datetime.fromisoformat(event.get("time").replace("Z", "+00:00")) if event.get("time") else datetime.now()
-    with open(Path(__file__).parent / "sql" / "origin.sql", "rt") as fr:
-        query = fr.read().format(
-            db=TIMESTREAM_DB_NAME,
-            table=ORIGIN_TABLE,
-            bucket=EXPORT_S3_BUCKET,
-            yesterday=(now - timedelta(days=1)).strftime("%Y-%m-%d"),
-        )
-    client.query(QueryString=query)
 
 
 def aggregate(event, __):

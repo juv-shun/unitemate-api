@@ -33,13 +33,12 @@ provider:
           Action:
             - s3:*
           Resource:
-            - !GetAtt UnitemateCSVExportBucket.Arn
-            - !Join ["", [!GetAtt UnitemateCSVExportBucket.Arn, "/*"]]
+            - !GetAtt UnitemateS3Bucket.Arn
+            - !Join ["", [!GetAtt UnitemateS3Bucket.Arn, "/*"]]
   environment:
     TIMESTREAM_DB_NAME: !Ref UnitemateTimeStreamDB
     ORIGIN_TABLE: origin_user_results-${sls:stage} # !GetAtt UnitemateTimeStreamUserResultTable.Name
     AGGREGATION_RESULT_TABLE: aggregation-result-${sls:stage} # !GetAtt UnitemateTimeStreamAggregationResultTable.Name
-    EXPORT_S3_BUCKET: !Ref UnitemateCSVExportBucket
     EXPORT_GCS_BUCKET: looker_studio_data_sources-${sls:stage}
 
 package:
@@ -60,16 +59,6 @@ functions:
           path: v1/match/user_result
           method: post
           private: true
-  csv_export_origin:
-    name: ${self:service}-csv-export-origin-${sls:stage}
-    handler: src.csv_export.handler.origin
-    description: TimeStream DBに格納されている元データをS3にCSVバックアップする関数
-    events:
-      - schedule:
-          name: ${self:service}-origin-export-time-${sls:stage}
-          description: Origin CSV Export Batch Event for ${self:service}
-          rate: cron(0 1 * * ? *)
-          enabled: ${param:schedule_enabled}
   csv_export_aggregation:
     name: ${self:service}-csv-export-aggregation-${sls:stage}
     handler: src.csv_export.handler.aggregate
@@ -140,10 +129,10 @@ resources:
         MagneticStoreWriteProperties:
           EnableMagneticStoreWrites: true
           MagneticStoreRejectedDataLocation: {}
-    UnitemateCSVExportBucket:
+    UnitemateS3Bucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: ${self:service}-export-files-${sls:stage}
+        BucketName: ${self:service}-bucket-${sls:stage}
         AccessControl: Private
         PublicAccessBlockConfiguration:
           BlockPublicAcls: True
